@@ -1,0 +1,6 @@
+android_app_import {
+    name: "coffeeui",
+    apk: "coffeeui.apk",
+    certificate: "platform",
+    privileged: true,
+}
