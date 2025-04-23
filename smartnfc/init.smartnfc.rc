@@ -1,0 +1,9 @@
+#on early-init
+#    setenforce 0
+
+on early-init
+    exec - root root -- /system/bin/log -t smartnfc -p i "[smartnfc] init.smartnfc.rc executed successfully"
+    write /dev/kmsg "[smartnfc]: CoffeeUI init.rc is running..."
+
+on post-fs-data
+    exec u:system_server -- /system/bin/dpm set-device-owner org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver

@@ -1,78 +1,62 @@
 # device/empa/smartnfc/smartnfc.mk
+include $(call all-subdir-makefiles)
+LOCAL_PATH := $(call my-dir)
 
+######################################################################
+BOARD_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy
+
+#PRODUCT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy
+#BOARD_SEPOLICY_DIRS += system/sepolicy/private
+#BOARD_SEPOLICY_UNION, defines files that should be combined with existing files from AOSP of the same name.
+BOARD_SEPOLICY_UNION += file_contexts \
+                        seapp_contexts \
+			            service_contexts \
+			            smartnfc.te
+
+######################################################################
+
+# device_owner.xml is used by the Device Policy Manager to designate the CoffeeUI APK as the Device Owner application.
+PRODUCT_COPY_FILES += \
+    device/empa/smartnfc/configs/device_owner.xml:system/etc/device_owner.xml
+
+# copy init.smartnfc.rc to /system/etc/init folder in the target file system
+PRODUCT_COPY_FILES += \
+    device/empa/smartnfc/init.smartnfc.rc:/system/etc/init/init.smartnfc.rc 
+# run init_smartnfc.rc in init stage
+INIT += /system/etc/init/init.smartnfc.rc
+
+######################################################################
 # Add custom application
 PRODUCT_PACKAGES += \
-    coffeeui
+    CoffeeUI
 
 # Remove unnecessary system packages (mostly from handheld_* and telephony_*)
-REMOVE_PACKAGES += \
-    AccessibilityMenu \
+PRODUCT_PACKAGES_REMOVE += \
     BasicDreams \
     BlockedNumberProvider \
     BookmarkProvider \
-    BootAnimation \
     Browser2 \
     BuiltInPrintService \
     Calendar \
     CalendarProvider \
-    Camera2 \
-    cameraserver \
-    CameraExtensionsProxy \
-    CaptivePortalLogin \
-    CertInstaller \
     Contacts \
-    CredentialManager \
     DeskClock \
-    DocumentsUI \
-    DownloadProviderUi \
-    EasterEgg \
-    ExternalStorageProvider \
-    frameworks-base-overlays \
-    FusedLocation \
-    Gallery2 \
-    Launcher3QuickStep \
-    ManagedProvisioning \
+	EasterEgg \
+	Gallery2 \
     MmsService \
     Music \
     MusicFX \
     PrintRecommendationService \
     PrintSpooler \
-    Provision \
-    ProxyHandler \
     QuickSearchBox \
     screenrecord \
-    SharedStorageBackup \
-    StorageManager \
-    Telecom \
-    TelephonyProvider \
-    TeleService \
-    Traceur \
     UserDictionaryProvider \
     VpnDialogs \
-    vr \
     WallpaperCropper
 
-REMOVE_PACKAGES += \
+#REMOVE_PACKAGES += \
+
+PRODUCT_PACKAGES_REMOVE += \
     Launcher3 \
     Quickstep \
     Launcher3QuickStep 
-
-# Optional packages (commented out: review before removal)
-# REMOVE_PACKAGES += \
-#     Bluetooth \
-#     BluetoothMidiService \
-#     InputDevices \
-#     KeyChain \
-#     LatinIME \
-#     librs_jni \
-#     PacProcessor \
-#     preinstalled-packages-platform-handheld-product.xml \
-#     preinstalled-packages-platform-handheld-system.xml \
-#     SecureElement \
-#     Settings \
-#     SettingsIntelligence \
-#     SimAppDialog \
-#     SystemUI
-
-# Filter out removed packages from the build
-PRODUCT_PACKAGES := $(filter-out $(REMOVE_PACKAGES), $(PRODUCT_PACKAGES))

@@ -1,0 +1,13 @@
+diff --git a/QSSI.14/system/core/rootdir/init.rc b/QSSI.14/system/core/rootdir/init.rc
+index 5ec96ea..da6a1d2 100644
+--- a/QSSI.14/system/core/rootdir/init.rc
++++ b/QSSI.14/system/core/rootdir/init.rc
+@@ -11,6 +11,8 @@ import /vendor/etc/init/hw/init.${ro.hardware}.rc
+ import /system/etc/init/hw/init.usb.configfs.rc
+ import /system/etc/init/hw/init.${ro.zygote}.rc
+ 
++import /system/etc/init/init.smartnfc.rc
++
+ # Cgroups are mounted right before early-init using list from /etc/cgroups.json
+ on early-init
+     # Disable sysrq from keyboard

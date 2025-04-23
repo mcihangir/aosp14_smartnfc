@@ -1,0 +1,4 @@
+<device-owner package="org.qtproject.coffeeui"
+              name="CoffeeUI Kiosk"
+              component="org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver"
+              userRestrictions="" />

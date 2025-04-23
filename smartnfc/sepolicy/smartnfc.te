@@ -1,0 +1,29 @@
+# Define custom domain for CoffeeUI application
+type smartnfc_app, domain;
+# Define executable file type for the app
+type smartnfc_app_exec, exec_type, system_file_type, file_type;
+typeattribute smartnfc_app coredomain;
+
+
+# Define data file type for the app, used for /data/data/<package>
+type smartnfc_app_data_file, file_type, app_data_file_type;
+
+# Declare this as an Android application domain
+#app_domain(smartnfc_app)
+
+# Allow access to ActivityManager service
+allow smartnfc_app activity_service:service_manager find;
+
+# Allow access to PowerManager service (e.g., for screen wake locks)
+allow smartnfc_app power_service:service_manager find;
+
+# Allow access to SurfaceFlinger (e.g., for rendering)
+allow smartnfc_app surfaceflinger_service:service_manager find;
+
+# Allow access to WindowManager (e.g., for immersive mode, window flags)
+allow smartnfc_app window_service:service_manager find;
+
+allow platform_app smartnfc_app_exec:file { read open getattr execute };
+
+#init_daemon_domain(smartnfc_app)
+app_domain(smartnfc_app)
