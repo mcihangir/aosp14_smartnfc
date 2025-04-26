@@ -14,17 +14,15 @@ BOARD_SEPOLICY_UNION += file_contexts \
 			            smartnfc.te
 
 ######################################################################
-
+# copy init.smartnfc.rc to /system/etc/init folder in the target file system
 # device_owner.xml is used by the Device Policy Manager to designate the CoffeeUI APK as the Device Owner application.
 PRODUCT_COPY_FILES += \
-    device/empa/smartnfc/configs/device_owner.xml:system/etc/device_owner.xml
+    device/empa/smartnfc/init.smartnfc.rc:/system/etc/init/init.smartnfc.rc \
+    device/empa/smartnfc/configs/device_owner.xml:system/etc/device_owner.xml \
+    device/empa/smartnfc/configs/privapp-permissions-coffeeui.xml:system/etc/permissions/privapp-permissions-coffeeui.xml
 
-# copy init.smartnfc.rc to /system/etc/init folder in the target file system
-PRODUCT_COPY_FILES += \
-    device/empa/smartnfc/init.smartnfc.rc:/system/etc/init/init.smartnfc.rc 
 # run init_smartnfc.rc in init stage
 INIT += /system/etc/init/init.smartnfc.rc
-
 ######################################################################
 # Add custom application
 PRODUCT_PACKAGES += \

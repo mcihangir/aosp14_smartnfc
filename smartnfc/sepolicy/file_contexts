@@ -1,2 +1,4 @@
+/data/system/device_owner.xml u:object_r:system_data_file:s0
+
 #/system/priv-app/CoffeeUI(/.*)? u:object_r:smartnfc_app_exec:s0
 #/system/priv-app/CoffeeUI/CoffeeUI.apk u:object_r:smartnfc_app_exec:s0

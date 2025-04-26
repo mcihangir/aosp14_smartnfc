@@ -1,4 +1,10 @@
-<device-owner package="org.qtproject.coffeeui"
-              name="CoffeeUI Kiosk"
-              component="org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver"
-              userRestrictions="" />
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<root>
+    <device-owner
+        package="org.qtproject.coffeeui"
+        name="CoffeeUI Kiosk"
+        component="org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver"
+        userRestrictionsMigrated="true"
+        canAccessDeviceIds="true" />
+    <device-owner-context userId="0" />
+</root>

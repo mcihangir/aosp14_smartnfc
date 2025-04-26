@@ -1,9 +1,29 @@
-#on early-init
-#    setenforce 0
+# ---------------------------------------------------
+# CoffeeUI Initialization Script (Corrected Version)
+# ---------------------------------------------------
 
 on early-init
-    exec - root root -- /system/bin/log -t smartnfc -p i "[smartnfc] init.smartnfc.rc executed successfully"
-    write /dev/kmsg "[smartnfc]: CoffeeUI init.rc is running..."
+    exec - root root -- /system/bin/log -t CoffeeUI -p i "[CoffeeUI] early-init: init.coffeeui.rc executed."
+    write /dev/kmsg "[CoffeeUI] early-init: Init script is running..."
 
 on post-fs-data
-    exec u:system_server -- /system/bin/dpm set-device-owner org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver
+    write /dev/kmsg "[CoffeeUI] post-fs-data: Stage reached."
+
+    # Copy device_owner.xml unconditionally (idempotent)
+    copy /system/etc/device_owner.xml /data/system/device_owner.xml
+    chmod 0600 /data/system/device_owner.xml
+    chown system system /data/system/device_owner.xml
+    restorecon /data/system/device_owner.xml
+    write /dev/kmsg "[CoffeeUI] post-fs-data: device_owner.xml copied and context restored."
+
+on property:sys.boot_completed=1
+    write /dev/kmsg "[CoffeeUI] boot-completed: Device Owner validation starting..."
+
+    exec_start set_device_owner_coffeeui
+
+    write /dev/kmsg "[CoffeeUI] boot-completed: Initialization finished."
+
+service set_device_owner_coffeeui /system/bin/dpm set-device-owner org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver
+    class main
+    user system
+    oneshot
