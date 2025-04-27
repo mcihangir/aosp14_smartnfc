@@ -6,5 +6,8 @@
         component="org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver"
         userRestrictionsMigrated="true"
         canAccessDeviceIds="true" />
+    <device-admin
+        package="org.qtproject.coffeeui"
+        receiver="org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver" />
     <device-owner-context userId="0" />
 </root>

@@ -1,29 +1,25 @@
 # ---------------------------------------------------
-# CoffeeUI Initialization Script (Corrected Version)
+# CoffeeUI Initialization Script (Final Version)
 # ---------------------------------------------------
 
 on early-init
-    exec - root root -- /system/bin/log -t CoffeeUI -p i "[CoffeeUI] early-init: init.coffeeui.rc executed."
-    write /dev/kmsg "[CoffeeUI] early-init: Init script is running..."
+    exec - root root -- /system/bin/log -t CoffeeUI -p i "[CoffeeLog] early-init: init.coffeeui.rc executed."
+    write /dev/kmsg "[CoffeeLog] early-init: Init script is running..."
 
 on post-fs-data
-    write /dev/kmsg "[CoffeeUI] post-fs-data: Stage reached."
+    wait /data/system
+    write /dev/kmsg "[CoffeeLog] post-fs-data: Stage reached."       
+    copy /system/etc/device_owner.xml /data/system/device_owner_2.xml
+    chmod 0600 /data/system/device_owner_2.xml
+    chown system system /data/system/device_owner_2.xml
+    restorecon /data/system/device_owner_2.xml       
 
-    # Copy device_owner.xml unconditionally (idempotent)
-    copy /system/etc/device_owner.xml /data/system/device_owner.xml
-    chmod 0600 /data/system/device_owner.xml
-    chown system system /data/system/device_owner.xml
-    restorecon /data/system/device_owner.xml
-    write /dev/kmsg "[CoffeeUI] post-fs-data: device_owner.xml copied and context restored."
+# (Optional) Add a little delay to ensure system_server will read device_owner.xml
+on late-init
+    exec - root root -- /system/bin/log -t CoffeeUI -p i "[CoffeeLog] late-init: CoffeeUI ready."
 
-on property:sys.boot_completed=1
-    write /dev/kmsg "[CoffeeUI] boot-completed: Device Owner validation starting..."
-
-    exec_start set_device_owner_coffeeui
-
-    write /dev/kmsg "[CoffeeUI] boot-completed: Initialization finished."
-
-service set_device_owner_coffeeui /system/bin/dpm set-device-owner org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver
-    class main
-    user system
-    oneshot
+#on property:sys.boot_completed=1
+#    wait /data/system/device_owner.xml
+#    exec - root root -- /system/bin/sh -c "sleep 2"
+#    exec u:system_server -- /system/bin/dpm set-active-admin org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver
+#    write /dev/kmsg "[CoffeeLog] boot_completed: set-active-admin executed."
