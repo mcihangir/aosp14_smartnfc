@@ -5,6 +5,9 @@ allow init system_data_file:file { create write open };
 # system/sepolicy/private/system_server.te
 allow system_server shell_exec:file { execute };  
 
+#allow smartnfc_app system_data_file:dir { search write add_name };
+#allow smartnfc_app system_data_file:file { create write open getattr };
+
 #########################################################################################3
 # Define custom domain for CoffeeUI application
 type smartnfc_app, domain;

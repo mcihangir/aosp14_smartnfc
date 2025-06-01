@@ -1,0 +1,7 @@
+version = Android init 0.8
+title = Boot chart for Android (1970-01-01 00:54:58)
+system.uname = Linux 4.19.157 #3 SMP PREEMPT Sun Jun 1 01:05:07 +03 2025 aarch64
+system.release = qti/bengal/bengal:14/UKQ1.240312.002/eng.mcihan.20250427.155032:userdebug/test-keys
+system.cpu = aarch64
+system.kernel.options = cgroup_disable=pressure rcupdate.rcu_expedited=1 rcu_nocbs=0-7 kpti=off console=ttyMSM0,115200n8 earlycon=msm_geni_serial,0x4a90000 androidboot.hardware=qcom androidboot.console=ttyMSM0 androidboot.memcg=1 lpm_levels.sleep_disabled=1 video=vfb:640x400,bpp=32,memsize=3072000 msm_rtb.filter=0x237 service_locator.enable=1 swiotlb=2048 loop.max_part=7 buildvariant=userdebug androidboot.verifiedbootstate=orange androidboot.keymaster=1 androidboot.vbmeta.device=PARTUUID=8deef93a-fdf0-d702-ec99-40c122c68792 androidboot.vbmeta.avb_version=1.0 androidboot.vbmeta.device_state=unlocked androidboot.vbmeta.hash_alg=sha256 androidboot.vbmeta.size=7488 androidboot.vbmeta.digest=0b2c19645b3eb32db9592ee77668852e40f98692c3993a8763aca20a92555ffb androidboot.vbmeta.invalidate_on_error=yes androidboot.veritymode=enforcing androidboot.bootdevice=4744000.sdhci androidboot.fstab_suffix=emmc androidboot.boot_devices=soc/4744000.sdhci androidboot.serialno=849690dd androidboot.baseband=msm msm_drm.dsi_display0=qcom,mdss_dsi_ili9881d_720p_video: androidboot.slot_suffix=_a rootwait ro init=/init androidboot.dtbo_idx=61 androidboot.dtb_idx=14
+

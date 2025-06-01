@@ -1,25 +1,40 @@
+import /vendor/etc/fstab.smartnfc
+
 # ---------------------------------------------------
 # CoffeeUI Initialization Script (Final Version)
 # ---------------------------------------------------
+on property:init.svc.bootanim=running
+    stop bootanim
+
+on boot
+    setprop service.bootanim.exit 1
+
+on property:sys.boot_completed=1
+    exec u:system_server -- /system/bin/am start -n org.qtproject.coffeeui/.QtActivity
 
 on early-init
     exec - root root -- /system/bin/log -t CoffeeUI -p i "[CoffeeLog] early-init: init.coffeeui.rc executed."
     write /dev/kmsg "[CoffeeLog] early-init: Init script is running..."
 
+    # Boot Optimization - Early Start zygote
+    setprop zygote.early_start true
+
 on post-fs-data
     wait /data/system
-    write /dev/kmsg "[CoffeeLog] post-fs-data: Stage reached."       
+#    write /dev/kmsg "[CoffeeLog] post-fs-data: Stage reached."      
+    exec - root root -- /system/bin/log -t CoffeeUI -p i "[CoffeeLog] post-fs-data: Stage reached."
     copy /system/etc/device_owner.xml /data/system/device_owner_2.xml
     chmod 0600 /data/system/device_owner_2.xml
     chown system system /data/system/device_owner_2.xml
-    restorecon /data/system/device_owner_2.xml       
+    restorecon /data/system/device_owner_2.xml
 
 # (Optional) Add a little delay to ensure system_server will read device_owner.xml
-on late-init
-    exec - root root -- /system/bin/log -t CoffeeUI -p i "[CoffeeLog] late-init: CoffeeUI ready."
+#on late-init
+#    exec - root root -- /system/bin/log -t CoffeeUI -p i "[CoffeeLog] late-init: CoffeeUI ready."
+#    exec u:system_server -- /system/bin/am start -n org.qtproject.coffeeui/.QtActivity
 
-#on property:sys.boot_completed=1
-#    wait /data/system/device_owner.xml
-#    exec - root root -- /system/bin/sh -c "sleep 2"
-#    exec u:system_server -- /system/bin/dpm set-active-admin org.qtproject.coffeeui/.CoffeeDeviceAdminReceiver
-#    write /dev/kmsg "[CoffeeLog] boot_completed: set-active-admin executed."
+###############################################################################################
+# Boot Optimization
+# If there is no launcher other than CoffeeUI in the system, to start it earlier
+on property:sys.boot_completed=0
+    class_start late_start

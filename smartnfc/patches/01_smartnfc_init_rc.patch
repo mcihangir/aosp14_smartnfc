@@ -1,13 +1,20 @@
 diff --git a/QSSI.14/system/core/rootdir/init.rc b/QSSI.14/system/core/rootdir/init.rc
-index 5ec96ea..da6a1d2 100644
+index 5ec96ea..a8caba3 100644
 --- a/QSSI.14/system/core/rootdir/init.rc
 +++ b/QSSI.14/system/core/rootdir/init.rc
-@@ -11,6 +11,8 @@ import /vendor/etc/init/hw/init.${ro.hardware}.rc
- import /system/etc/init/hw/init.usb.configfs.rc
- import /system/etc/init/hw/init.${ro.zygote}.rc
+@@ -1358,7 +1358,7 @@ on userspace-reboot-fs-remount
+   umount /data_mirror/ref_profiles
+   umount /data_mirror
+   remount_userdata
+-  start bootanim
++#  start bootanim
  
-+import /system/etc/init/init.smartnfc.rc
+ on userspace-reboot-resume
+   trigger userspace-reboot-fs-remount
+@@ -1381,3 +1381,5 @@ on property:persist.device_config.mglru_native.lru_gen_config=core_and_nonleaf_y
+   write /sys/kernel/mm/lru_gen/enabled 5
+ on property:persist.device_config.mglru_native.lru_gen_config=all
+   write /sys/kernel/mm/lru_gen/enabled 7
 +
- # Cgroups are mounted right before early-init using list from /etc/cgroups.json
- on early-init
-     # Disable sysrq from keyboard
++import /system/etc/init/init.smartnfc.rc
+\ No newline at end of file

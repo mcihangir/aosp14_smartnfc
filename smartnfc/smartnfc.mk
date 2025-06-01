@@ -1,6 +1,44 @@
 # device/empa/smartnfc/smartnfc.mk
-include $(call all-subdir-makefiles)
 LOCAL_PATH := $(call my-dir)
+include $(call all-subdir-makefiles)
+# Include package removal definitions
+include device/empa/smartnfc/smartnfc_remove_packages.mk
+
+######################################################################
+# Boot Optimization
+# Decrease Log level of kernel
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.log.tag=*V \
+    persist.kernel.kloglevel=1 \
+    persist.sys.init_log_level=1
+
+# Decrease Dexopt optimization
+PRODUCT_PROPERTY_OVERRIDES += \
+    dalvik.vm.dexopt.boot=verify-none \
+    dalvik.vm.dex2oat-filter=verify-none \
+    dalvik.vm.image-dex2oat-filter=verify-none \
+    persist.device_config.runtime.native_boot_image=no \
+    dalvik.vm.boot-dex2oat-threads=2
+
+# Skip ART odsign processes
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.art.disableodsign=true \
+    ro.odsign.disable=true
+
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+    persist.log.tag=*V \
+    persist.kernel.kloglevel=1 \
+    persist.sys.init_log_level=1 \
+    sys.init_log_level=1 \
+    loglevel=3 \
+    ro.kernel.android.bootloglevel=3 \
+    dalvik.vm.dexopt.boot=verify-none \
+    dalvik.vm.dex2oat-filter=verify-none \
+    dalvik.vm.image-dex2oat-filter=verify-none \
+    dalvik.vm.boot-dex2oat-threads=2 \
+    persist.device_config.runtime.native_boot_image=no \
+    ro.art.disableodsign=true \
+    ro.odsign.disable=true
 
 ######################################################################
 BOARD_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy
@@ -21,105 +59,32 @@ PRODUCT_COPY_FILES += \
     device/empa/smartnfc/configs/device_owner.xml:system/etc/device_owner.xml \
     device/empa/smartnfc/configs/device_policies.xml:system/etc/device_policies.xml \
     device/empa/smartnfc/configs/privapp-permissions-coffeeui.xml:system/etc/permissions/privapp-permissions-coffeeui.xml \
-    device/empa/smartnfc/configs/coffeeui_system.prop:system/etc/coffeeui_system.prop
+    device/empa/smartnfc/configs/coffeeui_system.prop:system/etc/coffeeui_system.prop \
+    device/empa/smartnfc/configs/fstab.smartnfc:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.smartnfc
 
 # run init_smartnfc.rc in init stage
-INIT += /system/etc/init/init.smartnfc.rc
+#INIT += /system/etc/init/init.smartnfc.rc
+# Modern init.rc dahil etme yöntemi
+TARGET_INIT_VENDOR_RC += device/empa/smartnfc/init.smartnfc.rc
+
+TARGET_RECOVERY_FSTAB := device/empa/smartnfc/configs/fstab.smartnfc
+# Veya fstab için daha modern
+TARGET_VENDOR_FSTAB := device/empa/smartnfc/configs/fstab.smartnfc
 
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     lockscreen.locked_out_disabled=true \
-    lockscreen.disable_pinning_dialogs=true
+    lockscreen.disable_pinning_dialogs=true \
+    loglevel=3 \
+    ro.kernel.android.bootloglevel=3
+
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    sys.init_log_level=1
+
+#    ro.launcher.default_package=org.qtproject.coffeeui \
+#    ro.launcher.default_class=org.qtproject.coffeeui.CoffeeActivity \
 ######################################################################
 # Add custom application
 PRODUCT_PACKAGES += \
     CoffeeUI
 
-# Remove unnecessary system packages (mostly from handheld_* and telephony_*)
-PRODUCT_PACKAGES_REMOVE += \
-    BasicDreams \
-    BlockedNumberProvider \
-    BookmarkProvider \
-    Browser2 \
-    BuiltInPrintService \
-    Calendar \
-    CalendarProvider \
-    Contacts \
-    DeskClock \
-	EasterEgg \
-	Gallery2 \
-    MmsService \
-    Music \
-    MusicFX \
-    PrintRecommendationService \
-    PrintSpooler \
-    QuickSearchBox \
-    screenrecord \
-    UserDictionaryProvider \
-    VpnDialogs \
-    WallpaperCropper
-
-#Default Launchers
-PRODUCT_PACKAGES_REMOVE += \
-    Launcher3 \
-    Launcher3QuickStep \
-    Quickstep \
-    SettingsIntelligence \
-    AmbientSense
-
-PRODUCT_PACKAGES_REMOVE += \
-    VoiceAIRef \
-    uimgbaservice \
-    aptxui \
-    RamdumpCopyUI \
-    PresenceApp \
-    PerformanceMode \
-    AtFwd2 \
-    Protips \
-    RideModeAudio \
-    ConferenceDialer \
-    QCC \
-    QdcmFF \
-    EmergencyInfo \
-    QesdkSysService \
-    workloadclassifier \
-    PowerSaveMode \
-    WfdService \
-    DCTestApp \
-    imssettings \
-    uceShimService \
-    SnapdragonMusic \
-    ConnectionManagerTestApp \
-    MangoLwm2mApp \
-    FM2 \
-    BTTestApp \
-    WigigSettings \
-    SimContact \
-    QtiTelephonySettings \
-    QtiTelephonyService \
-    QtiTelephony \
-    QSensorTest \
-    WigigTetheringRRO \
-    QColor \
-    colorservice \
-    UnifiedSensorTestApp \
-    TrustZoneAccessService \
-    ConnectionSecurityService \
-    datastatusnotification \
-    DeviceStatisticsService \
-    DeviceInfo \
-    my.tests.snapdragonsdktest \
-    SnapdragonSVA \
-    ModemTestMode \
-    QualcommVoiceActivation \
-    aptxals \
-    aptxacu \
-    atfwd \
-    DynamicDDSService \
-    BTTestApp \
-    xrwifiservice \
-    xrcbservice \
-    xrvdservice \
-    dpmserviceapp \
-    dcf \
-    ODLT 
 
