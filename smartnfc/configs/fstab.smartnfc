@@ -1,0 +1,1 @@
+/data     f2fs    rw,nosuid,nodev,noatime,discard,inline_xattr,flush_merge,fsync_mode=nobarrier   wait,check,formattable

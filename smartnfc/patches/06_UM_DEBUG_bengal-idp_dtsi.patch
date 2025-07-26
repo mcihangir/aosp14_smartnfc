@@ -1,0 +1,12 @@
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/bengal-idp.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/bengal-idp.dtsi
+index 160eb3c..588817a 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/bengal-idp.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/bengal-idp.dtsi
+@@ -338,6 +338,7 @@
+ 	};
+ 
+ 	focaltech@38 {
++		status = "disabled";
+ 		compatible = "focaltech,fts_ts";
+ 		reg = <0x38>;
+ 		interrupt-parent = <&tlmm>;

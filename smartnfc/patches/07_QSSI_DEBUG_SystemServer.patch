@@ -1,0 +1,353 @@
+diff --git a/QSSI.14/frameworks/base/services/java/com/android/server/SystemServer.java b/QSSI.14/frameworks/base/services/java/com/android/server/SystemServer.java
+index 5edb11c..097fac3 100644
+--- a/QSSI.14/frameworks/base/services/java/com/android/server/SystemServer.java
++++ b/QSSI.14/frameworks/base/services/java/com/android/server/SystemServer.java
+@@ -1422,6 +1422,7 @@ public final class SystemServer implements Dumpable {
+         t.traceEnd(); // startCoreServices
+     }
+ 
++    //MC: Optimized!
+     /**
+      * Starts a miscellaneous grab bag of stuff that has yet to be refactored and organized.
+      */
+@@ -1644,9 +1645,9 @@ public final class SystemServer implements Dumpable {
+             }, START_HIDL_SERVICES);
+ 
+             if (!isWatch && enableVrService) {
+-                t.traceBegin("StartVrManagerService");
+-                mSystemServiceManager.startService(VrManagerService.class);
+-                t.traceEnd();
++//                t.traceBegin("StartVrManagerService");
++//                mSystemServiceManager.startService(VrManagerService.class);
++//                t.traceEnd();
+             }
+ 
+             t.traceBegin("StartInputManager");
+@@ -1665,9 +1666,9 @@ public final class SystemServer implements Dumpable {
+                     (PackageManager.FEATURE_BLUETOOTH)) {
+                 Slog.i(TAG, "No Bluetooth Service (Bluetooth Hardware Not Present)");
+             } else {
+-                t.traceBegin("StartBluetoothService");
+-                mSystemServiceManager.startService(BLUETOOTH_SERVICE_CLASS);
+-                t.traceEnd();
++//                t.traceBegin("StartBluetoothService");
++//                 mSystemServiceManager.startService(BLUETOOTH_SERVICE_CLASS);
++//                t.traceEnd();
+             }
+ 
+             t.traceBegin("IpConnectivityMetrics");
+@@ -1735,7 +1736,7 @@ public final class SystemServer implements Dumpable {
+             String immsClassName = context.getResources().getString(
+                     R.string.config_deviceSpecificInputMethodManagerService);
+             if (immsClassName.isEmpty()) {
+-                mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
++                 mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
+             } else {
+                 try {
+                     Slog.i(TAG, "Starting custom IMMS: " + immsClassName);
+@@ -1895,9 +1896,9 @@ public final class SystemServer implements Dumpable {
+ 
+             if (deviceHasConfigString(context,
+                     R.string.config_defaultMusicRecognitionService)) {
+-                t.traceBegin("StartMusicRecognitionManagerService");
+-                mSystemServiceManager.startService(MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS);
+-                t.traceEnd();
++//                t.traceBegin("StartMusicRecognitionManagerService");
++//                mSystemServiceManager.startService(MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS);
++//                t.traceEnd();
+             } else {
+                 Slog.d(TAG,
+                         "MusicRecognitionManagerService not defined by OEM or disabled by flag");
+@@ -1912,9 +1913,9 @@ public final class SystemServer implements Dumpable {
+             startWearableSensingService(t);
+ 
+             // System Speech Recognition Service
+-            t.traceBegin("StartSpeechRecognitionManagerService");
+-            mSystemServiceManager.startService(SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS);
+-            t.traceEnd();
++//            t.traceBegin("StartSpeechRecognitionManagerService");
++//            mSystemServiceManager.startService(SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS);
++//            t.traceEnd();
+ 
+             // App prediction manager service
+             if (deviceHasConfigString(context, R.string.config_defaultAppPredictionService)) {
+@@ -2212,7 +2213,7 @@ public final class SystemServer implements Dumpable {
+ 
+             if (context.getResources().getBoolean(R.bool.config_enableWallpaperService)) {
+                 t.traceBegin("StartWallpaperManagerService");
+-                mSystemServiceManager.startService(WALLPAPER_SERVICE_CLASS);
++                 mSystemServiceManager.startService(WALLPAPER_SERVICE_CLASS);
+                 t.traceEnd();
+             } else {
+                 Slog.i(TAG, "Wallpaper service disabled by config");
+@@ -2228,7 +2229,7 @@ public final class SystemServer implements Dumpable {
+ 
+             t.traceBegin("StartAudioService");
+             if (!isArc) {
+-                mSystemServiceManager.startService(AudioService.Lifecycle.class);
++                 mSystemServiceManager.startService(AudioService.Lifecycle.class);
+             } else {
+                 String className = context.getResources()
+                         .getString(R.string.config_deviceSpecificAudioService);
+@@ -2245,9 +2246,9 @@ public final class SystemServer implements Dumpable {
+             t.traceEnd();
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BROADCAST_RADIO)) {
+-                t.traceBegin("StartBroadcastRadioService");
+-                mSystemServiceManager.startService(BroadcastRadioService.class);
+-                t.traceEnd();
++//                t.traceBegin("StartBroadcastRadioService");
++//                 mSystemServiceManager.startService(BroadcastRadioService.class);
++//                t.traceEnd();
+             }
+ 
+             if (!isTv) {
+@@ -2276,9 +2277,9 @@ public final class SystemServer implements Dumpable {
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MIDI)) {
+                 // Start MIDI Manager service
+-                t.traceBegin("StartMidiManager");
+-                mSystemServiceManager.startService(MIDI_SERVICE_CLASS);
+-                t.traceEnd();
++//                t.traceBegin("StartMidiManager");
++//                 mSystemServiceManager.startService(MIDI_SERVICE_CLASS);
++//                t.traceEnd();
+             }
+ 
+             // Start ADB Debugging Service
+@@ -2296,7 +2297,7 @@ public final class SystemServer implements Dumpable {
+                     || isEmulator) {
+                 // Manage USB host and device support
+                 t.traceBegin("StartUsbService");
+-                mSystemServiceManager.startService(USB_SERVICE_CLASS);
++                 mSystemServiceManager.startService(USB_SERVICE_CLASS);
+                 t.traceEnd();
+             }
+ 
+@@ -2329,7 +2330,7 @@ public final class SystemServer implements Dumpable {
+             }
+ 
+             t.traceBegin("StartColorDisplay");
+-            mSystemServiceManager.startService(ColorDisplayService.class);
++             mSystemServiceManager.startService(ColorDisplayService.class);
+             t.traceEnd();
+ 
+             // TODO(aml-jobscheduler): Think about how to do it properly.
+@@ -2347,7 +2348,7 @@ public final class SystemServer implements Dumpable {
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BACKUP)) {
+                 t.traceBegin("StartBackupManager");
+-                mSystemServiceManager.startService(BACKUP_MANAGER_SERVICE_CLASS);
++                 mSystemServiceManager.startService(BACKUP_MANAGER_SERVICE_CLASS);
+                 t.traceEnd();
+             }
+ 
+@@ -2455,7 +2456,7 @@ public final class SystemServer implements Dumpable {
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
+                 t.traceBegin("StartCompanionDeviceManager");
+-                mSystemServiceManager.startService(COMPANION_DEVICE_MANAGER_SERVICE_CLASS);
++                 mSystemServiceManager.startService(COMPANION_DEVICE_MANAGER_SERVICE_CLASS);
+                 t.traceEnd();
+ 
+                 // VirtualDeviceManager depends on CDM to control the associations.
+@@ -2469,45 +2470,45 @@ public final class SystemServer implements Dumpable {
+             t.traceEnd();
+ 
+             t.traceBegin("StartMediaSessionService");
+-            mSystemServiceManager.startService(MEDIA_SESSION_SERVICE_CLASS);
++             mSystemServiceManager.startService(MEDIA_SESSION_SERVICE_CLASS);
+             t.traceEnd();
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
+-                t.traceBegin("StartHdmiControlService");
+-                mSystemServiceManager.startService(HdmiControlService.class);
+-                t.traceEnd();
++//                t.traceBegin("StartHdmiControlService");
++//                 mSystemServiceManager.startService(HdmiControlService.class);
++//                t.traceEnd();
+             }
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LIVE_TV)
+                     || mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+-                t.traceBegin("StartTvInteractiveAppManager");
+-                mSystemServiceManager.startService(TvInteractiveAppManagerService.class);
+-                t.traceEnd();
++//                t.traceBegin("StartTvInteractiveAppManager");
++//                 mSystemServiceManager.startService(TvInteractiveAppManagerService.class);
++//                t.traceEnd();
+             }
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LIVE_TV)
+                     || mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+-                t.traceBegin("StartTvInputManager");
+-                mSystemServiceManager.startService(TvInputManagerService.class);
+-                t.traceEnd();
++//                t.traceBegin("StartTvInputManager");
++//                 mSystemServiceManager.startService(TvInputManagerService.class);
++//                t.traceEnd();
+             }
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TUNER)) {
+-                t.traceBegin("StartTunerResourceManager");
+-                mSystemServiceManager.startService(TunerResourceManagerService.class);
+-                t.traceEnd();
++//                t.traceBegin("StartTunerResourceManager");
++//                 mSystemServiceManager.startService(TunerResourceManagerService.class);
++//                t.traceEnd();
+             }
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+                 t.traceBegin("StartMediaResourceMonitor");
+-                mSystemServiceManager.startService(MEDIA_RESOURCE_MONITOR_SERVICE_CLASS);
++                 mSystemServiceManager.startService(MEDIA_RESOURCE_MONITOR_SERVICE_CLASS);
+                 t.traceEnd();
+             }
+ 
+             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+-                t.traceBegin("StartTvRemoteService");
+-                mSystemServiceManager.startService(TvRemoteService.class);
+-                t.traceEnd();
++//                t.traceBegin("StartTvRemoteService");
++//                 mSystemServiceManager.startService(TvRemoteService.class);
++//                t.traceEnd();
+             }
+ 
+             t.traceBegin("StartMediaRouterService");
+@@ -2529,7 +2530,7 @@ public final class SystemServer implements Dumpable {
+             if (hasFeatureFace) {
+                 t.traceBegin("StartFaceSensor");
+                 final FaceService faceService =
+-                        mSystemServiceManager.startService(FaceService.class);
++                         mSystemServiceManager.startService(FaceService.class);
+                 t.traceEnd();
+             }
+ 
+@@ -2542,7 +2543,7 @@ public final class SystemServer implements Dumpable {
+             if (hasFeatureFingerprint) {
+                 t.traceBegin("StartFingerprintSensor");
+                 final FingerprintService fingerprintService =
+-                        mSystemServiceManager.startService(FingerprintService.class);
++                         mSystemServiceManager.startService(FingerprintService.class);
+                 t.traceEnd();
+             }
+ 
+@@ -2604,10 +2605,11 @@ public final class SystemServer implements Dumpable {
+         }
+ 
+         t.traceBegin("StartMediaProjectionManager");
+-        mSystemServiceManager.startService(MediaProjectionManagerService.class);
++         mSystemServiceManager.startService(MediaProjectionManagerService.class);
+         t.traceEnd();
+ 
+        if (isWatch) {
++/*        
+             // Must be started before services that depend it, e.g. WearConnectivityService
+             t.traceBegin("StartWearPowerService");
+             mSystemServiceManager.startService(WEAR_POWER_SERVICE_CLASS);
+@@ -2632,6 +2634,7 @@ public final class SystemServer implements Dumpable {
+             t.traceBegin("StartWearGlobalActionsService");
+             mSystemServiceManager.startService(WEAR_GLOBAL_ACTIONS_SERVICE_CLASS);
+             t.traceEnd();
++*/            
+         }
+ 
+         if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_SLICES_DISABLED)) {
+@@ -2670,7 +2673,7 @@ public final class SystemServer implements Dumpable {
+ 
+         // Incidentd and dumpstated helper
+         t.traceBegin("StartIncidentCompanionService");
+-        mSystemServiceManager.startService(IncidentCompanionService.class);
++         mSystemServiceManager.startService(IncidentCompanionService.class);
+         t.traceEnd();
+ 
+         // SdkSandboxManagerService
+@@ -2679,6 +2682,7 @@ public final class SystemServer implements Dumpable {
+         t.traceEnd();
+ 
+         // AdServicesManagerService (PP API service)
++/*        
+         t.traceBegin("StartAdServicesManagerService");
+         SystemService adServices = mSystemServiceManager
+                 .startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
+@@ -2686,6 +2690,7 @@ public final class SystemServer implements Dumpable {
+             mDumper.addDumpable((Dumpable) adServices);
+         }
+         t.traceEnd();
++*/
+ 
+         // OnDevicePersonalizationSystemService
+         t.traceBegin("StartOnDevicePersonalizationSystemService");
+@@ -2698,9 +2703,9 @@ public final class SystemServer implements Dumpable {
+ 
+         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+             // MMS service broker
+-            t.traceBegin("StartMmsService");
+-            mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
+-            t.traceEnd();
++//            t.traceBegin("StartMmsService");
++//             mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
++//            t.traceEnd();
+         }
+ 
+         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOFILL)) {
+@@ -2885,9 +2890,9 @@ public final class SystemServer implements Dumpable {
+         }
+         t.traceEnd();
+ 
+-        t.traceBegin("GameManagerService");
+-        mSystemServiceManager.startService(GAME_MANAGER_SERVICE_CLASS);
+-        t.traceEnd();
++//        t.traceBegin("GameManagerService");
++//         mSystemServiceManager.startService(GAME_MANAGER_SERVICE_CLASS);
++//        t.traceEnd();
+ 
+         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)) {
+             t.traceBegin("UwbService");
+@@ -2914,7 +2919,7 @@ public final class SystemServer implements Dumpable {
+         }
+ 
+         t.traceBegin("StartMediaCommunicationService");
+-        mSystemServiceManager.startService(MEDIA_COMMUNICATION_SERVICE_CLASS);
++         mSystemServiceManager.startService(MEDIA_COMMUNICATION_SERVICE_CLASS);
+         t.traceEnd();
+ 
+         t.traceBegin("AppCompatOverridesService");
+@@ -2985,6 +2990,7 @@ public final class SystemServer implements Dumpable {
+             boolean isAutomotive = mPackageManager
+                     .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+             if (isAutomotive) {
++/*                
+                 t.traceBegin("StartCarServiceHelperService");
+                 final SystemService cshs = mSystemServiceManager
+                         .startService(CAR_SERVICE_HELPER_SERVICE_CLASS);
+@@ -2995,6 +3001,7 @@ public final class SystemServer implements Dumpable {
+                     dpms.setDevicePolicySafetyChecker((DevicePolicySafetyChecker) cshs);
+                 }
+                 t.traceEnd();
++*/                
+             }
+ 
+             if (isWatch) {
+@@ -3355,15 +3362,15 @@ public final class SystemServer implements Dumpable {
+     }
+ 
+     private void startAmbientContextService(@NonNull TimingsTraceAndSlog t) {
+-        t.traceBegin("StartAmbientContextService");
+-        mSystemServiceManager.startService(AmbientContextManagerService.class);
+-        t.traceEnd();
++//        t.traceBegin("StartAmbientContextService");
++//        mSystemServiceManager.startService(AmbientContextManagerService.class);
++//        t.traceEnd();
+     }
+ 
+     private void startWearableSensingService(@NonNull TimingsTraceAndSlog t) {
+-        t.traceBegin("startWearableSensingService");
+-        mSystemServiceManager.startService(WearableSensingManagerService.class);
+-        t.traceEnd();
++//        t.traceBegin("startWearableSensingService");
++//        mSystemServiceManager.startService(WearableSensingManagerService.class);
++//        t.traceEnd();
+     }
+ 
+     private static void startSystemUi(Context context, WindowManagerService windowManager) {

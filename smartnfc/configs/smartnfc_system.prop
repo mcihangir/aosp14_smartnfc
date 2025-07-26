@@ -1,0 +1,11 @@
+# Disable lockout on the lock screen
+lockscreen.locked_out_disabled=true
+
+# Disable pinning dialogs for kiosk mode
+lockscreen.disable_pinning_dialogs=true
+
+# Rotate the display by 270 degrees (reverse landscape)
+ro.sf.hwrotation=270
+
+# Custom property example
+ro.custom.prop1=value1

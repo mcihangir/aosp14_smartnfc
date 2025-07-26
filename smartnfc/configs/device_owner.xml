@@ -1,0 +1,21 @@
+<root>
+    <device-owner
+        package="org.qtproject.smartlauncher"
+        name="SmartLauncher Kiosk"
+        component="org.qtproject.smartlauncher/.SmartLauncherDeviceAdminReceiver"
+        userRestrictionsMigrated="true"
+        canAccessDeviceIds="true"
+        default-home="true">
+        <!-- WHITELIST HERE -->
+        <lock-task-packages>
+            <package name="org.qtproject.smartlauncher"/>
+            <package name="org.qtproject.coffeeui"/>
+        </lock-task-packages>
+    </device-owner>
+
+    <device-admin
+        package="org.qtproject.smartlauncher"
+        receiver="org.qtproject.smartlauncher/.SmartLauncherDeviceAdminReceiver"/>
+
+    <device-owner-context userId="0"/>
+</root>

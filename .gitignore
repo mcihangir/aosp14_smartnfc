@@ -1,0 +1,4 @@
+# Ignore specific APK files
+smartnfc/apps/angrybirds/angry-birds.apk
+smartnfc/apps/geometrydash/geometry-dash.apk
+

@@ -1,0 +1,25 @@
+diff --git a/UM.9.15/device/qcom/bengal/bengal.mk b/UM.9.15/device/qcom/bengal/bengal.mk
+index 1e1eb68..25080c8 100755
+--- a/UM.9.15/device/qcom/bengal/bengal.mk
++++ b/UM.9.15/device/qcom/bengal/bengal.mk
+@@ -139,7 +139,8 @@ PRODUCT_PROPERTY_OVERRIDES += persist.vendor.rcs.singlereg.feature = 1
+ PRODUCT_NAME := bengal
+ PRODUCT_DEVICE := bengal
+ PRODUCT_BRAND := qti
+-PRODUCT_MODEL := Bengal for arm64
++#PRODUCT_MODEL := Bengal for arm64
++PRODUCT_MODEL := smartNFC
+ 
+ 
+ TARGET_USES_AOSP := false
+@@ -277,3 +278,9 @@ $(call inherit-product-if-exists, vendor/quectel/Qlog/prebuild/android/qlog.mk)
+ $(call inherit-product-if-exists, vendor/qcom/defs/product-defs/system/*.mk)
+ $(call inherit-product-if-exists, vendor/qcom/defs/product-defs/vendor/*.mk)
+ ###################################################################################
++
++
++#MC: Custom Buil Name
++#PRODUCT_PROPERTY_OVERRIDES += ro.build.display.id=smartNFC-userdebug
++PRODUCT_PACKAGES_REMOVE += \
++    bootanimation 
+\ No newline at end of file

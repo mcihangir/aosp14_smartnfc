@@ -1,0 +1,24 @@
+diff --git a/UM.9.15/system/core/rootdir/init.rc b/UM.9.15/system/core/rootdir/init.rc
+index 3480222..b25c280 100644
+--- a/UM.9.15/system/core/rootdir/init.rc
++++ b/UM.9.15/system/core/rootdir/init.rc
+@@ -991,8 +991,8 @@ on property:vold.decrypt=trigger_restart_framework
+     class_start_post_data core
+     class_start main
+     class_start late_start
+-    setprop service.bootanim.exit 0
+-    start bootanim
++    setprop service.bootanim.exit 1
++#    start bootanim
+ 
+ on property:vold.decrypt=trigger_shutdown_framework
+     class_reset late_start
+@@ -1100,7 +1100,7 @@ on userspace-reboot-fs-remount
+   umount /data_mirror/cur_profiles
+   umount /data_mirror
+   remount_userdata
+-  start bootanim
++#  start bootanim
+ 
+ on userspace-reboot-resume
+   trigger userspace-reboot-fs-remount

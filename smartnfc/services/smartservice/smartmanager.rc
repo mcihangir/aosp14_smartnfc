@@ -1,0 +1,10 @@
+service smartmanager /system/bin/smartmanager
+    class main
+    user system
+    group system
+    oneshot
+#    seclabel u:r:system_server:s0
+
+#on property:sys.boot_completed=1
+on boot
+    start smartmanager

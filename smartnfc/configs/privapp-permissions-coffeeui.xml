@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <privapp-permissions package="org.qtproject.coffeeui">
+        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.permission.WRITE_SETTINGS"/>
+        <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
+        <permission name="android.permission.DISPATCH_PROVISIONING_MESSAGE"/>
+        <permission name="android.permission.STATUS_BAR"/>
+        <permission name="android.permission.EXPAND_STATUS_BAR"/>
+        <!-- Add any other required permissions here -->
+    </privapp-permissions>
+</permissions>

@@ -1,0 +1,10 @@
+diff --git a/QSSI.14/device/qcom/qssi/qssi.mk b/QSSI.14/device/qcom/qssi/qssi.mk
+index ff772a1..5c20b78 100644
+--- a/QSSI.14/device/qcom/qssi/qssi.mk
++++ b/QSSI.14/device/qcom/qssi/qssi.mk
+@@ -319,3 +319,5 @@ $(call inherit-product-if-exists, vendor/qcom/defs/product-defs/system/*.mk)
+ PRODUCT_PACKAGES_REMOVE += \
+     Cam2test \
+     Camera2
++
++$(call inherit-product-if-exists, device/empa/smartnfc/smartnfc.mk)

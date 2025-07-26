@@ -1,0 +1,32 @@
+#############################################
+# Custom SELinux domain for SmartManager (Init-Started Daemon)
+
+# Define the domain for smartmanager
+type smartdomain, domain;
+
+# Give smartdomain all core domain attributes (optional - gives very broad permissions)
+typeattribute smartdomain coredomain;
+
+# Define the executable type for the binary
+type smartdomain_exec, exec_type, file_type;
+
+# Allow init to transition into smartdomain and give basic daemon permissions
+init_daemon_domain(smartdomain)
+
+#############################################
+# Usage Notes:
+# 1. Add the following entry to file_contexts to label the binary:
+#    /system/bin/smartmanager    u:object_r:smartdomain_exec:s0
+#
+# 2. Define the service in init.rc:
+#    service smartmanager /system/bin/smartmanager
+#        class main
+#        user system
+#        group system
+#        oneshot
+#
+# 3. This policy is intended for binaries started by init.
+#    If you want to assign this domain to an APK instead,
+#    you must also add an entry to seapp_contexts, for example:
+#    user=_app seinfo=platform name=org.qtproject.coffeeui domain=smartdomain type=privapp_data_file
+#############################################

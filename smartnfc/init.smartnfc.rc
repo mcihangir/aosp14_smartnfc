@@ -1,0 +1,48 @@
+import /vendor/etc/fstab.smartnfc
+import /system/etc/init/smartmanager.rc
+
+# ---------------------------------------------------
+# SmartLauncher Initialization Script (CoffeeUI NOT auto-started)
+# ---------------------------------------------------
+on early-init
+    write /dev/kmsg "[SmartLauncherLog] early-init: Init script is running..."
+    write /sys/class/graphics/fb0/blank 1
+
+on post-fs-data
+    wait /data/system
+    exec - root root -- /system/bin/log -t SmartLauncher -p i "[SmartLauncherLog] post-fs-data: Stage reached."
+    copy /system/etc/device_owner.xml /data/system/device_owner_2.xml
+    chmod 0600 /data/system/device_owner_2.xml
+    chown system system /data/system/device_owner_2.xml
+    restorecon /data/system/device_owner_2.xml
+
+on early-boot
+    # CoffeeUI 
+    mkdir /data/user/0/org.qtproject.coffeeui 0771 system system
+    mkdir /data/user/0/org.qtproject.coffeeui/cache 0771 system system
+    mkdir /data/user/0/org.qtproject.coffeeui/files 0771 system system
+    restorecon -RF /data/user/0/org.qtproject.coffeeui
+
+    # SmartLauncher 
+    #mkdir /data/user/0/org.qtproject.smartlauncher 0771 system system
+    #mkdir /data/user/0/org.qtproject.smartlauncher/cache 0771 system system
+    #mkdir /data/user/0/org.qtproject.smartlauncher/files 0771 system system
+    #restorecon -RF /data/user/0/org.qtproject.smartlauncher
+
+
+# Optimize system responsiveness at boot
+on property:sys.boot_completed=1
+    write /dev/stune/top-app/schedtune.boost 50
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+    write /proc/self/oom_score_adj -800
+    setprop service.bootanim.exit 1
+    stop bootanim
+
+# Override the boot animation with no-op binary
+service bootanim /bin/true
+    disabled
+
+on early-init
+    # Ekran yönü zorlaması
+    setprop persist.panel.orientation 270
+    setprop ro.sf.hwrotation 270

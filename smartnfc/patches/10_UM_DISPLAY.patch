@@ -1,0 +1,303 @@
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/input/touchscreen/Kconfig b/UM.9.15/kernel/msm-4.19/drivers/input/touchscreen/Kconfig
+index 3b9aaa3..5c1c930 100755
+--- a/UM.9.15/kernel/msm-4.19/drivers/input/touchscreen/Kconfig
++++ b/UM.9.15/kernel/msm-4.19/drivers/input/touchscreen/Kconfig
+@@ -1380,4 +1380,6 @@ source "drivers/input/touchscreen/gt1x/Kconfig"
+ 
+ source "drivers/input/touchscreen/nt36xxx/Kconfig"
+ 
++source "drivers/input/touchscreen/gt9xx/Kconfig
++
+ endif
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/input/touchscreen/Makefile b/UM.9.15/kernel/msm-4.19/drivers/input/touchscreen/Makefile
+index 26e4d13..f0b0cd2 100755
+--- a/UM.9.15/kernel/msm-4.19/drivers/input/touchscreen/Makefile
++++ b/UM.9.15/kernel/msm-4.19/drivers/input/touchscreen/Makefile
+@@ -113,5 +113,6 @@ obj-$(CONFIG_TOUCHSCREEN_ROHM_BU21023)	+= rohm_bu21023.o
+ #obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX) += synaptics_dsx/
+ #obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_TCM)	+= synaptics_tcm/
+ obj-$(CONFIG_TOUCHSCREEN_FTS)	+= focaltech_touch/
+-obj-$(CONFIG_TOUCHSCREEN_GT1X)	+= gt1x/
++#obj-$(CONFIG_TOUCHSCREEN_GT1X)	+= gt1x/
+ #obj-$(CONFIG_TOUCHSCREEN_NT36XXX)	+= nt36xxx/
++obj-y += gt9xx/
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
+index c460a5f..a480c1b 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
+@@ -93,7 +93,17 @@
+ 	status = "ok";
+ };
+ 
+-
++&dsi_dmtft50365_720p_video {
++	//qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
++	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_myboard>;
++	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_pwm";
++	pwms = <&pm2250_pwm3 0 0>;
++	qcom,bl-pmic-pwm-period-usecs = <100>;
++	qcom,mdss-dsi-bl-min-level = <1>;
++	qcom,mdss-dsi-bl-max-level = <255>;
++	qcom,platform-te-gpio = <&tlmm 81 0>;
++	qcom,platform-reset-gpio = <&tlmm 82 0>;
++};
+ 
+ &dsi_ili9881c_720p_video {
+        qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+@@ -175,13 +185,63 @@
+ };
+ 
+ &sde_dsi {
+-	qcom,dsi-default-panel = <&dsi_ili9881d_720p_video>;
++	qcom,dsi-default-panel = <&dsi_dmtft50365_720p_video>;	
+ };
+ 
+ &qupv3_se2_i2c {
+ 	status = "okay";
+ 	//qcom,i2c-touch-active="novatek,NVT-ts";
+ 
++	goodix@5d {
++		compatible = "goodix,gt9xx";
++		reg = <0x5d>;
++		interrupt-parent = <&tlmm>;
++		interrupts = <22 0x2008>;
++		reset-gpios = <&tlmm 71 0x0>;
++		interrupt-gpios = <&tlmm 80 0x2008>;
++		power-gpios = <&tlmm 0 0x0>;
++		//vdd-supply = <&L17A>;
++		vdd-supply = <&lcd_vdd_3p3>;
++		vcc-i2c-supply  = <&L15A>;
++		goodix,panel-coords = <0 0 719 1405>;
++		goodix,display-coords = <0 0 719 1279>;
++		goodix,button-map= <139 172 158>;
++		goodix,enable-power-off;
++		goodix,product-id = "911";
++
++		pinctrl-names = "pmx_ts_active","pmx_ts_suspend";
++		pinctrl-0 = <&ts_int_active &ts_reset_active>;
++		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
++
++		goodix,cfg-data0 = [
++			00 D0 02 00 05 0A 45 00 01 08
++			28 05 50 32 03 05 00 00 00 00
++			00 00 00 00 00 00 00 8C 2C 0E
++			17 15 31 0D 00 00 00 99 04 1D
++			00 00 00 00 00 03 64 32 00 00
++			00 0F 6A 94 C5 02 07 00 00 04
++			94 12 00 66 1B 00 47 28 00 32
++			3C 00 26 58 00 26 00 00 00 00
++			00 00 00 00 00 00 00 00 00 00
++			00 00 00 00 00 00 00 00 00 00
++			00 00 00 00 00 00 00 00 00 00
++			00 00 02 04 06 08 0A 0C 0E 10
++			12 14 16 18 1A 1C 00 00 00 00
++			00 00 00 00 00 00 00 00 00 00
++			00 00 00 02 04 06 08 0A 0C 0F
++			10 12 13 14 28 26 24 22 21 20
++			1F 1E 1D 1C 18 16 FF FF 00 00
++			00 00 00 00 00 00 00 00 00 00
++			00 00 00 00 45 01
++		];
++
++		goodix,have-touch-key;
++		goodix,driver-send-cfg;
++
++		panel = <&dsi_dmtft50365_720p_video>;				
++	};
++
++/*
+ 	goodix_ts@14 {
+ 		compatible = "goodix,gt1x";
+ 		reg = <0x14>;
+@@ -195,8 +255,10 @@
+ 		pinctrl-0 = <&ts_int_active &ts_reset_active>;
+ 		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+ 		pinctrl-2 = <&ts_release>;
+-		panel = <&dsi_hx8394f_720p_video>;
++		//panel = <&dsi_hx8394f_720p_video>;
++		panel = <&dsi_ili9881c_720p_video>;
+ 	};
++*/	
+ 
+ 	focaltech@38{
+ 		compatible = "focaltech,fts_ts";
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-pinctrl.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-pinctrl.dtsi
+index b311dc7..9a24fb8 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-pinctrl.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-pinctrl.dtsi
+@@ -1248,8 +1248,9 @@
+ 				input-enable;
+ 			};
+ 		};
+-/*cam start*/
+-		cam_af_vdd2v8_active: cam_af_vdd2v8_active {
++
++/* pinctrl for lcd vdd gpio60  */
++		lcd_vdd_3p3_active: lcd_vdd_3p3_active {
+ 			mux {
+ 				pins = "gpio60";
+ 				function = "gpio";
+@@ -1259,6 +1260,20 @@
+ 				pins = "gpio60";
+ 				bias-disable;
+ 				drive-strength = <2>;
++				//output-high;  /* When LCD power is turned on, GPIO60 goes high */
++			};
++		};		
++/*cam start*/
++		cam_af_vdd2v8_active: cam_af_vdd2v8_active {
++			mux {
++				pins = "gpio57";
++				function = "gpio";
++			};
++
++			config {
++				pins = "gpio57";
++				bias-disable;
++				drive-strength = <2>;
+ 			};
+ 		};
+ 
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-regulator.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-regulator.dtsi
+index 1b3c013..ad695d6 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-regulator.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-regulator.dtsi
+@@ -365,15 +365,29 @@
+ };
+ /*cam start*/
+ &soc {
++	/* SmartNFC: Define new 3.3V LDO for LCD */
++	lcd_vdd_3p3: lcd_vdd_3p3  {
++		compatible = "regulator-fixed";
++		regulator-name = "lcd_vdd_3p3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++        startup-delay-us = <10000>;
++		enable-active-high;
++		regulator-boot-on;
++		gpio = <&tlmm 60 0x0>;
++		pinctrl-names = "default";
++        pinctrl-0 = <&lcd_vdd_3p3_active>; // define this in scuba-pinctrl.dtsi
++	};
++
+ 	cam_af_vdd2v8: cam_af_vdd2v8 {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "cam_af_vdd2v8";
+ 		regulator-min-microvolt = <2800000>;
+-        regulator-max-microvolt = <2800000>;
++		regulator-max-microvolt = <2800000>;
+         startup-delay-us = <0>;
+ 		enable-active-high;
+ 		regulator-boot-on;
+-		gpio = <&tlmm 60 0x0>;
++		gpio = <&tlmm 57 0x0>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&cam_af_vdd2v8_active>;
+ 	};
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-sde-display.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-sde-display.dtsi
+index 75caf69..c3a2e18 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-sde-display.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-sde-display.dtsi
+@@ -6,8 +6,34 @@
+ #include "dsi-panel-ili9881d-720p-video.dtsi"
+ #include "dsi-panel-hx8399c-1080p-video.dtsi"
+ #include "dsi-panel-ili9881c-720p-video.dtsi"
++#include "dsi-panel-dmtft50365-720p-video.dtsi"
+ 
+ &soc {
++	dsi_panel_pwr_supply_myboard: dsi_panel_pwr_supply_myboard {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		qcom,panel-supply-entry@0 {
++			reg = <0>;
++			qcom,supply-name = "vddio";
++			qcom,supply-min-voltage = <1800000>;
++			qcom,supply-max-voltage = <1800000>;  
++			qcom,supply-enable-load = <62000>;
++			qcom,supply-disable-load = <80>;
++			qcom,supply-post-on-sleep = <20>;
++		};
++
++		qcom,panel-supply-entry@1 {
++			reg = <1>;
++			qcom,supply-name = "vdd";
++			qcom,supply-min-voltage = <2800000>;   
++			qcom,supply-max-voltage = <3300000>;
++			qcom,supply-enable-load = <857000>;
++			qcom,supply-disable-load = <0>;
++			qcom,supply-post-on-sleep = <0>;
++		};
++	};
++
+ 	dsi_panel_pwr_supply: dsi_panel_pwr_supply {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+@@ -113,11 +139,12 @@
+ 		qcom,platform-te-gpio = <&tlmm 81 0>;
+ 		qcom,panel-te-source = <0>;
+ 		vddio-supply = <&L15A>;
+-		vdd-supply = <&cam_af_vdd2v8>;
++		//vdd-supply = <&cam_af_vdd2v8>;
++		vdd-supply = <&lcd_vdd_3p3>;
+ 		qcom,mdp = <&mdss_mdp>;
+ 
+-		qcom,dsi-default-panel =
+-			<&dsi_ili9881d_720p_video>;
++		qcom,dsi-default-panel = 			
++			<&dsi_dmtft50365_720p_video>;
+ 	};
+ };
+ 
+@@ -125,6 +152,7 @@
+ 	connectors = <&sde_dsi>;
+ };
+ 
++
+ &dsi_hx8394f_720p_video {
+ 	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
+ 	qcom,mdss-dsi-t-clk-post = <0x0a>;
+@@ -148,7 +176,8 @@
+ 	};
+ };
+ 
+-&dsi_ili9881c_720p_video {
++
++&dsi_ili9881d_720p_video {
+ 	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
+ 	qcom,mdss-dsi-t-clk-post = <0x0a>;
+ 	qcom,mdss-dsi-t-clk-pre = <0x1d>;
+@@ -166,18 +195,18 @@
+ 	};
+ };
+ 
+-&dsi_ili9881d_720p_video {
++&dsi_dmtft50365_720p_video {
+ 	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
+ 	qcom,mdss-dsi-t-clk-post = <0x0a>;
+-	qcom,mdss-dsi-t-clk-pre = <0x1d>;
++	qcom,mdss-dsi-t-clk-pre = <0x1e>;
+ 	qcom,mdss-dsi-display-timings {
+ 		timing@0{
+ 			qcom,mdss-dsi-panel-phy-timings =
+-			[1E 0D 04 05 02 02 04 0a
+-			 1E 0D 04 05 02 02 04 0a
+-			 1E 0D 04 05 02 02 04 0a
+-			 1E 0D 04 05 02 02 04 0a
+-			 1E	1B 04 06 02 02 04 0a];
++			[1E 0E 04 05 02 02 04 a0
++			1E 0E 04 05 02 02 04 a0
++			1E 0E 04 05 02 02 04 a0
++			1E 0E 04 05 02 02 04 a0
++			1E 1C 04 06 02 02 04 a0];
+ 			qcom,display-topology = <1 0 1>;
+ 			qcom,default-topology-index = <0>;
+ 		};
+@@ -201,6 +230,7 @@
+ 		};
+ 	};
+ };
++
+ &dsi_hx8399c_1080p_video {
+ 	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
+ 	qcom,mdss-dsi-t-clk-post = <0x0d>;

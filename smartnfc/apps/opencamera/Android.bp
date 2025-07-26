@@ -1,0 +1,10 @@
+android_app_import {
+    name: "OpenCamera",
+    apk: "OpenCamera.apk",
+    certificate: "platform",
+    privileged: true,
+    dex_preopt: {
+        enabled: true,
+        profile_guided: false,
+    },
+}

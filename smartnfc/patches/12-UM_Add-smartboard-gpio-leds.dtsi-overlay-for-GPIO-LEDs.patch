@@ -1,0 +1,91 @@
+From b48e7841836af68a49d96a60ee1373545eec9a40 Mon Sep 17 00:00:00 2001
+From: Mehmet Cihangir <mehmet.cihangir@yahoo.com>
+Date: Fri, 25 Jul 2025 21:43:43 +0300
+Subject: [PATCH] Add smartboard-gpio-leds.dtsi overlay for GPIO LEDs
+
+---
+ .../qcom/overlays/smartboard-gpio-leds.dtsi        | 72 ++++++++++++++++++++++
+ 1 file changed, 72 insertions(+)
+ create mode 100644 UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/overlays/smartboard-gpio-leds.dtsi
+
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/overlays/smartboard-gpio-leds.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/overlays/smartboard-gpio-leds.dtsi
+new file mode 100644
+index 0000000..ce02a66
+--- /dev/null
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/overlays/smartboard-gpio-leds.dtsi
+@@ -0,0 +1,72 @@
++// File: smartboard-gpio-leds.dtsi
++// Description: Custom GPIO LED definitions for SC200E-based SmartBoard.
++//              This file defines three GPIO-controlled LEDs (GPIO111, GPIO98, GPIO99)
++//              using the gpio-leds driver. It configures the pinmux and default states
++//              without modifying the base pinctrl files.
++// Location:    Locate the smartboard-gpio-leds.dtsi under UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/overlays/smartboard-gpio-leds.dtsi
++// Usage:       Add #include "overlays/smartboard-gpio-leds.dtsi" to 
++//              UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
++
++&tlmm {
++    led1_default: led1_default {
++        mux {
++            pins = "gpio111";
++            function = "gpio";
++        };
++        config {
++            pins = "gpio111";
++            drive-strength = <2>;
++            bias-pull-down;
++        };
++    };
++
++    led2_default: led2_default {
++        mux {
++            pins = "gpio98";
++            function = "gpio";
++        };
++        config {
++            pins = "gpio98";
++            drive-strength = <2>;
++            bias-pull-down;
++        };
++    };
++
++    led3_default: led3_default {
++        mux {
++            pins = "gpio99";
++            function = "gpio";
++        };
++        config {
++            pins = "gpio99";
++            drive-strength = <2>;
++            bias-pull-down;
++        };
++    };
++};
++
++&soc {
++    gpio-leds {
++        compatible = "gpio-leds";
++        pinctrl-names = "default";
++        pinctrl-0 = <&led1_default &led2_default &led3_default>;
++
++        led1 {
++            label = "led1";
++            gpios = <&tlmm 111 GPIO_ACTIVE_HIGH>;
++            default-state = "on"; //"off";
++        };
++
++        led2 {
++            label = "led2";
++            gpios = <&tlmm 98 GPIO_ACTIVE_HIGH>;
++            default-state = "on"; //"off";
++        };
++
++        led3 {
++            label = "led3";
++            gpios = <&tlmm 99 GPIO_ACTIVE_HIGH>;
++            default-state = "on"; //"off";
++        };
++    };
++};
+-- 
+2.7.4
+
