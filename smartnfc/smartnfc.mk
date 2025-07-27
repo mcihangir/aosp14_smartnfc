@@ -44,11 +44,12 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # SEPolicy configuration
 BOARD_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy
 
-BOARD_SEPOLICY_UNION += smartnfc.te
+#SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/public
+#SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/private
 
-# sepolicy rules for product images
-PRODUCT_PUBLIC_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy
-PRODUCT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy
+PRODUCT_PUBLIC_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/public
+PRODUCT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/private
+
 
 ######################################################################
 # Copy custom init and configuration files
@@ -59,7 +60,8 @@ PRODUCT_COPY_FILES += \
     device/empa/smartnfc/configs/privapp-permissions-smartlauncher.xml:system/etc/permissions/privapp-permissions-smartlauncher.xml \
     device/empa/smartnfc/configs/privapp-permissions-coffeeui.xml:system/etc/permissions/privapp-permissions-coffeeui.xml \
     device/empa/smartnfc/configs/smartnfc_system.prop:system/etc/smartnfc_system.prop \
-    device/empa/smartnfc/configs/fstab.smartnfc:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.smartnfc
+    device/empa/smartnfc/configs/fstab.smartnfc:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.smartnfc 
+#    device/empa/smartnfc/services/smartservice/smartmanager.sh:system/bin/smartmanager.sh
 
 PRODUCT_PROPERTY_OVERRIDES += ro.control_privapp_permissions=enforce
 PRODUCT_DEFAULT_PERMISSION_EXCEPTIONS += device/empa/smartnfc/configs/default-permissions-smartlauncher.xml
@@ -80,11 +82,20 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 ######################################################################
 # Display orientation properties (reverse landscape)
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.surface_flinger.primary_display_orientation=3 \
-    persist.panel.orientation=270 \
     ro.sf.hwrotation=270 \
+    persist.panel.orientation=270 \
+    ro.surface_flinger.primary_display_orientation=3 \
+    persist.sys.accelerometer_rotation=0 \
     ro.bootanimation.disabled=1
 
+# Qualcomm cihazlar için ekstra (device/qcom/qssi/system.prop)
+PRODUCT_PROPERTY_OVERRIDES += \
+    debug.sf.orientation=3 \
+    vendor.display.orientation=270 \
+    vendor.display.primary_rotation_270=1
+
+#    ro.input.touch.orientation.calibration=matrix \
+#    ro.input.touch.orientation.matrix=0,-1,1,0,0,0,0,0,1 \
 # Temporary: Allow permissive SELinux for development
 SELINUX_IGNORE_NEVERALLOWS := true
 BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive

@@ -1,0 +1,23 @@
+diff --git a/QSSI.14/frameworks/base/services/core/java/com/android/server/wm/DisplayRotation.java b/QSSI.14/frameworks/base/services/core/java/com/android/server/wm/DisplayRotation.java
+index 82c236d..3c908d1 100644
+--- a/QSSI.14/frameworks/base/services/core/java/com/android/server/wm/DisplayRotation.java
++++ b/QSSI.14/frameworks/base/services/core/java/com/android/server/wm/DisplayRotation.java
+@@ -314,6 +314,8 @@ public class DisplayRotation {
+         mUndockedHdmiRotation = readRotation(R.integer.config_undockedHdmiRotation);
+ 
+         int defaultRotation = readDefaultDisplayRotation(displayAddress);
++        // Mehmet
++        defaultRotation = Surface.ROTATION_270; // Force at constructor
+         mRotation = defaultRotation;
+ 
+         mDisplayRotationCoordinator = displayRotationCoordinator;
+@@ -657,6 +659,9 @@ public class DisplayRotation {
+                     mDisplayRotationCoordinator.getDefaultDisplayCurrentRotation());
+         }
+ 
++        // Mehmet
++        rotation = Surface.ROTATION_270;
++
+         ProtoLog.v(WM_DEBUG_ORIENTATION,
+                 "Computed rotation=%s (%d) for display id=%d based on lastOrientation=%s (%d) and "
+                         + "oldRotation=%s (%d)",

@@ -3,15 +3,10 @@
 /data/system/device_policies.xml         u:object_r:system_data_file:s0
 
 # CoffeeUI application (using smartdomain for unified domain)
-#/system/priv-app/CoffeeUI(/.*)?          u:object_r:smartdomain_exec:s0
-#/system/priv-app/CoffeeUI/CoffeeUI.apk   u:object_r:smartdomain_exec:s0
 /data/user/0/org.qtproject.coffeeui(/.*)? u:object_r:app_data_file:s0
 
 # SmartLauncher application (using smartdomain as well)
-#/system/priv-app/SmartLauncher(/.*)?     u:object_r:smartdomain_exec:s0
-#/system/priv-app/SmartLauncher/SmartLauncher.apk u:object_r:smartdomain_exec:s0
 
-# Services binaries (smartmanager, smartservice)
-/system/bin/smartmanager                 u:object_r:smartdomain_exec:s0
-#/system/bin/smartservice                 u:object_r:smartdomain_exec:s0
-#/system/bin/smartmanager                  u:object_r:system_file:s0
+# Services binaries
+#/system/bin/smartmanager               u:object_r:smartdomain_exec:s0
+/system/bin/smartmanager                u:object_r:system_file:s0

@@ -1,0 +1,49 @@
+diff --git a/QSSI.14/frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java b/QSSI.14/frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java
+index 52505c3..b889033 100644
+--- a/QSSI.14/frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java
++++ b/QSSI.14/frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java
+@@ -16,6 +16,9 @@
+ 
+ package com.android.server.wm;
+ 
++import android.view.Display;
++import android.view.Surface;
++
+ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+ import static android.Manifest.permission.INPUT_CONSUMER;
+ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+@@ -4426,6 +4429,9 @@ public class WindowManagerService extends IWindowManager.Stub
+                     final DisplayContent displayContent = mRoot.mChildren.get(i);
+                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateRotation: display");
+                     final boolean rotationChanged = displayContent.updateRotationUnchecked();
++                    // EKRAN Force rotation to landscape
++                    displayContent.getDisplayRotation().freezeRotation(Surface.ROTATION_270);
++
+                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+ 
+                     if (rotationChanged) {
+@@ -5241,9 +5247,24 @@ public class WindowManagerService extends IWindowManager.Stub
+             if (mMaxUiWidth > 0) {
+                 mRoot.forAllDisplays(displayContent -> displayContent.setMaxUiWidth(mMaxUiWidth));
+             }
++            
++            // EKRAN ADD THIS LINE TO FORCE LANDSCAPE
++            mRoot.forAllDisplays(displayContent ->
++                displayContent.getDisplayRotation().freezeRotation(Surface.ROTATION_270));
++                
+             applyForcedPropertiesForDefaultDisplay();
+             mAnimator.ready();
+             mDisplayReady = true;
++            
++            // --------------------------------------------------------------------------------------
++            // EKRAN
++            final DisplayContent defaultDisplay = mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
++            if (defaultDisplay != null) {
++                defaultDisplay.getDisplayRotation().setFixedToUserRotation(Surface.ROTATION_270);                
++                //ProtoLog.i(WM_DEBUG_ORIENTATION, "Mehmetx Default display permanently set to landscape.");
++            }
++            // --------------------------------------------------------------------------------------
++
+             // Reconfigure all displays to make sure that forced properties and
+             // DisplayWindowSettings are applied.
+             mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);

@@ -1,0 +1,44 @@
+diff --git a/QSSI.14/frameworks/base/services/core/java/com/android/server/display/LocalDisplayAdapter.java b/QSSI.14/frameworks/base/services/core/java/com/android/server/display/LocalDisplayAdapter.java
+index 71405d4..9d5b9f7 100644
+--- a/QSSI.14/frameworks/base/services/core/java/com/android/server/display/LocalDisplayAdapter.java
++++ b/QSSI.14/frameworks/base/services/core/java/com/android/server/display/LocalDisplayAdapter.java
+@@ -41,6 +41,7 @@ import android.view.DisplayEventReceiver;
+ import android.view.DisplayShape;
+ import android.view.RoundedCorners;
+ import android.view.SurfaceControl;
++import android.view.Surface;
+ 
+ import com.android.internal.R;
+ import com.android.internal.annotations.VisibleForTesting;
+@@ -674,8 +675,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
+                 final Resources res = getOverlayContext().getResources();
+                 final boolean isBuiltIn = ((mInfo.address) != null) ?
+                    ((((DisplayAddress.Physical) mInfo.address).getPort() & 0x80) == 0x80) : false;
+-
++        
+                 mInfo.flags |= DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY;
++                // Mehmet
++                mInfo.rotation = Surface.ROTATION_270;
+ 
+                 if (mIsFirstDisplay) {
+                     if (res.getBoolean(R.bool.config_mainBuiltInDisplayIsRound)
+@@ -683,6 +686,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
+                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
+                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
+                     }
++                    // Mehmet
++                    mInfo.setAssumedDensityForExternalDisplay(mActiveSfDisplayMode.height, mActiveSfDisplayMode.width);
++
+                 } else if (isBuiltIn) {
+                     mInfo.type = Display.TYPE_INTERNAL;
+                     mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
+@@ -760,6 +766,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
+                 mInfo.brightnessDefault = getDisplayDeviceConfig().getBrightnessDefault();
+                 mInfo.hdrSdrRatio = mCurrentHdrSdrRatio;
+             }
++            // Mehmet
++            mInfo.rotation = Surface.ROTATION_270;
++            
+             return mInfo;
+         }
+ 

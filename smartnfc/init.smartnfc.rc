@@ -2,47 +2,50 @@ import /vendor/etc/fstab.smartnfc
 import /system/etc/init/smartmanager.rc
 
 # ---------------------------------------------------
-# SmartLauncher Initialization Script (CoffeeUI NOT auto-started)
+# SmartLauncher / CoffeeUI Initialization Script
 # ---------------------------------------------------
+
 on early-init
+    # Log that init script has started
     write /dev/kmsg "[SmartLauncherLog] early-init: Init script is running..."
+    # Turn off display at startup
     write /sys/class/graphics/fb0/blank 1
 
 on post-fs-data
+    # Wait until /data/system is available
     wait /data/system
+    # Log that post-fs-data stage is reached
     exec - root root -- /system/bin/log -t SmartLauncher -p i "[SmartLauncherLog] post-fs-data: Stage reached."
+    # Copy and set permissions for device owner file
     copy /system/etc/device_owner.xml /data/system/device_owner_2.xml
     chmod 0600 /data/system/device_owner_2.xml
     chown system system /data/system/device_owner_2.xml
     restorecon /data/system/device_owner_2.xml
 
 on early-boot
-    # CoffeeUI 
+    # Create required directories for CoffeeUI
     mkdir /data/user/0/org.qtproject.coffeeui 0771 system system
     mkdir /data/user/0/org.qtproject.coffeeui/cache 0771 system system
     mkdir /data/user/0/org.qtproject.coffeeui/files 0771 system system
     restorecon -RF /data/user/0/org.qtproject.coffeeui
 
-    # SmartLauncher 
-    #mkdir /data/user/0/org.qtproject.smartlauncher 0771 system system
-    #mkdir /data/user/0/org.qtproject.smartlauncher/cache 0771 system system
-    #mkdir /data/user/0/org.qtproject.smartlauncher/files 0771 system system
-    #restorecon -RF /data/user/0/org.qtproject.smartlauncher
-
-
-# Optimize system responsiveness at boot
 on property:sys.boot_completed=1
+    # Boost top-app performance after boot completion
     write /dev/stune/top-app/schedtune.boost 50
     write /dev/stune/top-app/schedtune.prefer_idle 1
+    # Protect from OOM killer
     write /proc/self/oom_score_adj -800
+    # Stop boot animation
     setprop service.bootanim.exit 1
     stop bootanim
 
-# Override the boot animation with no-op binary
+# Disable boot animation by overriding it with a no-op binary
 service bootanim /bin/true
     disabled
 
-on early-init
-    # Ekran yönü zorlaması
+on boot
+    # Force display orientation to 270° (reverse landscape) and disable auto-rotation
+    setprop sys.user_rotation 3
+    setprop persist.sys.accelerometer_rotation 0
     setprop persist.panel.orientation 270
     setprop ro.sf.hwrotation 270

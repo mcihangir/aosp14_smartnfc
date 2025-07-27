@@ -1,0 +1,51 @@
+diff --git a/QSSI.14/device/qcom/qssi/overlay/frameworks/base/core/res/res/values/config.xml b/QSSI.14/device/qcom/qssi/overlay/frameworks/base/core/res/res/values/config.xml
+index 1356e2e..6a4a7d6 100644
+--- a/QSSI.14/device/qcom/qssi/overlay/frameworks/base/core/res/res/values/config.xml
++++ b/QSSI.14/device/qcom/qssi/overlay/frameworks/base/core/res/res/values/config.xml
+@@ -37,4 +37,5 @@
+        <item>"wifi_br0"</item>
+    </string-array>
+ 
++    <bool name="config_allowAllRotations">true</bool>
+ </resources>
+diff --git a/QSSI.14/device/qcom/qssi/system.prop b/QSSI.14/device/qcom/qssi/system.prop
+index 6931f38..86a6991 100644
+--- a/QSSI.14/device/qcom/qssi/system.prop
++++ b/QSSI.14/device/qcom/qssi/system.prop
+@@ -1,6 +1,8 @@
+ #
+ # system.prop for qssi
+ #
++ro.sf.hwrotation=270
++persist.sys.accelerometer_rotation=0
+ 
+ rild.libpath=/vendor/lib64/libril-qc-hal-qmi.so
+ #rild.libargs=-d /dev/smd0
+diff --git a/QSSI.14/frameworks/base/core/res/res/values/config.xml b/QSSI.14/frameworks/base/core/res/res/values/config.xml
+index dc1d73f..c30d5b9 100644
+--- a/QSSI.14/frameworks/base/core/res/res/values/config.xml
++++ b/QSSI.14/frameworks/base/core/res/res/values/config.xml
+@@ -563,7 +563,8 @@
+ 
+     <!-- If true, the screen can be rotated via the accelerometer in all 4
+          rotations as the default behavior. -->
+-    <bool name="config_allowAllRotations">false</bool>
++    <!-- bool name="config_allowAllRotations">false</bool -->
++    <bool name="config_allowAllRotations">true</bool>
+ 
+     <!-- If false and config_allowAllRotations is false, the screen will rotate to the natural
+          orientation of the device when the auto-rotate policy is toggled. -->
+diff --git a/QSSI.14/frameworks/base/packages/SettingsProvider/res/values/defaults.xml b/QSSI.14/frameworks/base/packages/SettingsProvider/res/values/defaults.xml
+index 8456e59..adcceed 100644
+--- a/QSSI.14/frameworks/base/packages/SettingsProvider/res/values/defaults.xml
++++ b/QSSI.14/frameworks/base/packages/SettingsProvider/res/values/defaults.xml
+@@ -115,7 +115,8 @@
+     <bool name="def_accessibility_display_magnification_auto_update">true</bool>
+ 
+     <!-- Default for Settings.System.USER_ROTATION -->
+-    <integer name="def_user_rotation">0</integer>
++    <!-- integer name="def_user_rotation">0</integer -->
++    <integer name="def_user_rotation">3</integer>
+ 
+     <!-- Default for Settings.Secure.DOWNLOAD_MAX_BYTES_OVER_MOBILE. <=0 if no limit -->
+     <integer name="def_download_manager_max_bytes_over_mobile">-1</integer>
