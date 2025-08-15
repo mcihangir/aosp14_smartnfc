@@ -4,7 +4,6 @@ PRODUCT_PACKAGES_REMOVE += \
     BasicDreams \
     BlockedNumberProvider \
     BookmarkProvider \
-    Browser2 \
     BuiltInPrintService \
     Calendar \
     CalendarProvider \
@@ -23,6 +22,7 @@ PRODUCT_PACKAGES_REMOVE += \
     VpnDialogs \
     WallpaperCropper
 
+#Browser2 \
 #Default Launchers
 PRODUCT_PACKAGES_REMOVE += \
     Launcher3 \

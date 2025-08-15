@@ -1,5 +1,5 @@
 import /vendor/etc/fstab.smartnfc
-import /system/etc/init/smartmanager.rc
+import /system/etc/init/smartdaemon.rc
 
 # ---------------------------------------------------
 # SmartLauncher / CoffeeUI Initialization Script
@@ -49,3 +49,19 @@ on boot
     setprop persist.sys.accelerometer_rotation 0
     setprop persist.panel.orientation 270
     setprop ro.sf.hwrotation 270
+
+on boot    
+    chown system system /sys/class/leds/led1/brightness
+    chmod 0664        /sys/class/leds/led1/brightness
+
+    chown system system /sys/class/leds/led2/brightness
+    chmod 0664        /sys/class/leds/led2/brightness
+
+    chown system system /sys/class/leds/led3/brightness
+    chmod 0664        /sys/class/leds/led3/brightness
+
+    chown system system /sys/class/leds/red/brightness
+    chmod 0664        /sys/class/leds/red/brightness
+
+    chown system system /sys/class/leds/green/brightness
+    chmod 0664        /sys/class/leds/green/brightness

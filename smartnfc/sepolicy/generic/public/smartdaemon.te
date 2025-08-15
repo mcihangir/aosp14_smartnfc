@@ -1,0 +1,3 @@
+# Declare the process domain for smartdaemon.
+
+type smartdaemon, domain;

@@ -1,8 +1,8 @@
 LOCAL_PATH := $(call my-dir)
 include $(call all-subdir-makefiles)
-
 # Include package removal definitions
 include device/empa/smartnfc/smartnfc_remove_packages.mk
+include device/empa/smartnfc/sepolicy/SEPolicy.mk
 
 ######################################################################
 # Boot Optimization
@@ -42,14 +42,20 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 ######################################################################
 # SEPolicy configuration
-BOARD_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy
 
-#SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/public
+#SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS  += device/empa/smartnfc/sepolicy/system_ext/public
+#SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/system_ext/private
+#PRODUCT_PUBLIC_SEPOLICY_DIRS  += device/empa/smartnfc/sepolicy/system_ext/public
+#PRODUCT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/system_ext/private
+#PRODUCT_FILE_CONTEXTS            += device/empa/smartnfc/sepolicy/private/file_contexts
+#SYSTEM_EXT_FILE_CONTEXTS         += device/empa/smartnfc/sepolicy/system_ext/private/file_contexts
+#SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS  += device/empa/smartnfc/sepolicy/public
 #SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/private
-
-PRODUCT_PUBLIC_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/public
-PRODUCT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/private
-
+#BOARD_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy
+#BOARD_PLAT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/plat_private
+#PRODUCT_PRIVATE_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/private
+#PRODUCT_FILE_CONTEXTS += device/empa/smartnfc/sepolicy/file_contexts
+#PRODUCT_PUBLIC_SEPOLICY_DIRS += device/empa/smartnfc/sepolicy/public
 
 ######################################################################
 # Copy custom init and configuration files
@@ -60,8 +66,13 @@ PRODUCT_COPY_FILES += \
     device/empa/smartnfc/configs/privapp-permissions-smartlauncher.xml:system/etc/permissions/privapp-permissions-smartlauncher.xml \
     device/empa/smartnfc/configs/privapp-permissions-coffeeui.xml:system/etc/permissions/privapp-permissions-coffeeui.xml \
     device/empa/smartnfc/configs/smartnfc_system.prop:system/etc/smartnfc_system.prop \
-    device/empa/smartnfc/configs/fstab.smartnfc:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.smartnfc 
-#    device/empa/smartnfc/services/smartservice/smartmanager.sh:system/bin/smartmanager.sh
+    device/empa/smartnfc/services/smartdaemon/smartdaemon.rc:system_ext/etc/init/smartdaemon.rc \
+    device/empa/smartnfc/configs/smartlauncher_whitelist.xml:system/etc/smartlauncher_whitelist.xml \
+    device/empa/smartnfc/configs/privapp-permissions-smartperipheral.xml:system/etc/permissions/privapp-permissions-smartperipheral.xml
+
+
+#   device/empa/smartnfc/ueventd.smartnfc.rc:system/etc/ueventd.rc \
+#   device/empa/smartnfc/configs/fstab.smartnfc:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.smartnfc \
 
 PRODUCT_PROPERTY_OVERRIDES += ro.control_privapp_permissions=enforce
 PRODUCT_DEFAULT_PERMISSION_EXCEPTIONS += device/empa/smartnfc/configs/default-permissions-smartlauncher.xml
@@ -70,6 +81,9 @@ TARGET_INIT_VENDOR_RC += device/empa/smartnfc/init.smartnfc.rc
 TARGET_RECOVERY_FSTAB := device/empa/smartnfc/configs/fstab.smartnfc
 TARGET_VENDOR_FSTAB := device/empa/smartnfc/configs/fstab.smartnfc
 
+
+#DEVICE_MANIFEST_FILE += device/empa/smartnfc/vintf_fragments/smartnfc_manifest.xml
+#DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += device/empa/smartnfc/vintf_fragments/smartnfc_framework_matrix.xml
 ######################################################################
 # Default properties
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
@@ -108,9 +122,16 @@ PRODUCT_PROPERTY_OVERRIDES += \
 ######################################################################
 # Include custom applications in the build
 PRODUCT_PACKAGES += \
-    smartmanager \
     SmartLauncher \
     CoffeeUI \
+    SmartPeripheral \
     OpenCamera \
     AngryBirds \
-    GeometryDash
+    smartnfc.hardware.led-ndk_platform \
+    smartnfc.hardware.led-java \
+    smartdaemon
+
+#    Firefox \
+#    GeometryDash \
+#    smartservice-api
+#    SmartService \

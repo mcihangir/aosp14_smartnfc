@@ -1,2 +1,0 @@
-typeattribute smartdomain coredomain;
-init_daemon_domain(smartdomain)

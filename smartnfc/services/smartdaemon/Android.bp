@@ -1,0 +1,22 @@
+cc_binary {
+    name: "smartdaemon",
+    srcs: [
+        "src/smartdaemon.cpp",
+        "src/SmartLedService.cpp",
+    ],
+    shared_libs: [
+        "libbinder_ndk",
+        "liblog",
+        "libbase",
+        // Import the generated NDK interface stub:
+        "smartnfc.hardware.led-ndk_platform",
+    ],
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ],
+    init_rc: ["smartdaemon.rc"],
+    vendor: false, 
+    system_ext_specific: true,  
+}

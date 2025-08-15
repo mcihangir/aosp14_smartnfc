@@ -1,0 +1,22 @@
+#service smartdaemon /system_ext/bin/smartdaemon
+#    class main
+#    user root
+#    group root system
+#    oneshot
+
+
+#service smartdaemon /system_ext/bin/smartdaemon
+#    class late_start
+#    user system
+#    group system
+#    disabled
+
+service smartdaemon /system_ext/bin/smartdaemon
+    class late_start
+    user root
+    group root system
+    disabled
+
+on property:sys.boot_completed=1
+    start smartdaemon
+

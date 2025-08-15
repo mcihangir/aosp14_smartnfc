@@ -1,0 +1,10 @@
+<!-- /system/etc/smartlauncher_whitelist.xml -->
+<whitelist>
+    <package name="org.qtproject.smartlauncher"/>
+    <package name="org.qtproject.coffeeui"/>
+    <package name="org.qtproject.smartperipheral"/>
+    <package name="net.sourceforge.opencamera"/>
+    <package name="com.rovio.angrybirds"/>
+    <package name="com.qualcomm.qti.sensors.qsensortest"/>
+    <package name="org.chromium.webview_shell"/>
+</whitelist>

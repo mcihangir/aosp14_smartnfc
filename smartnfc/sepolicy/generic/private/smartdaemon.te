@@ -1,0 +1,34 @@
+# smartdaemon.te
+# NOTE: 'type smartdaemon, domain;' is defined in a public .te file.
+
+# Executable type and init domain transition
+type smartdaemon_exec, system_file_type, exec_type, file_type;
+init_daemon_domain(smartdaemon)
+
+# --- Generic sysfs (label = u:object_r:sysfs:s0) access ---
+# Walk into directories under /sys (needed to reach led1/led2/led3)
+allow smartdaemon sysfs:dir { search read open };
+
+# Follow symlinks under /sys if any
+allow smartdaemon sysfs:lnk_file { read getattr };
+
+# Open/read/write generic sysfs files (e.g., .../led1/brightness)
+allow smartdaemon sysfs:file { open read write getattr };
+
+# (If you also touch /sys/class/leds nodes labeled as sysfs_leds, keep these)
+allow smartdaemon sysfs_leds:dir      { search read open };
+allow smartdaemon sysfs_leds:lnk_file { read getattr };
+allow smartdaemon sysfs_leds:file     { open read write getattr };
+
+# --- Binder / ServiceManager (unchanged) ---
+binder_use(smartdaemon)
+type smartled_service, service_manager_type;
+allow smartdaemon smartled_service:service_manager add;
+allow appdomain  smartled_service:service_manager find;
+
+# Optional: adb shell testing
+allow shell smartled_service:service_manager find;
+binder_use(appdomain)
+binder_call(appdomain, smartdaemon)
+binder_use(shell)
+binder_call(shell, smartdaemon)

@@ -10,6 +10,7 @@
         <lock-task-packages>
             <package name="org.qtproject.smartlauncher"/>
             <package name="org.qtproject.coffeeui"/>
+            <package name="org.qtproject.smartperipheral"/>
         </lock-task-packages>
     </device-owner>
 

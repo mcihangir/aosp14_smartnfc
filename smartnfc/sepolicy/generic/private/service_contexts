@@ -1,0 +1,3 @@
+aidl.smartnfc.hardware.led.ISmartLed/default    u:object_r:smartled_service:s0
+smartnfc.hardware.led.ISmartLed/default         u:object_r:smartled_service:s0
+

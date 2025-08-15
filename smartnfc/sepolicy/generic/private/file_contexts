@@ -1,0 +1,13 @@
+# Device owner and policy XML files (already labeled by platform usually; here for clarity)
+# If these already exist in platform policy, this block is redundant but harmless.
+# Keep only if you really need to override or ensure mapping on your build.
+# /data/system/device_owner.xml            u:object_r:system_data_file:s0
+# /data/system/device_policies.xml         u:object_r:system_data_file:s0
+
+# CoffeeUI application data (default app_data_file; normally not needed to override)
+# /data/user/0/org.qtproject.coffeeui(/.*)? u:object_r:app_data_file:s0
+
+# Services binaries (the key one: smartdaemon in system_ext)
+# Map the binary to our exec type so the domain transition can happen.
+# Both /system_ext and legacy /system/system_ext are covered:
+ /(?:system_ext|system/system_ext)/bin/smartdaemon  u:object_r:smartdaemon_exec:s0
