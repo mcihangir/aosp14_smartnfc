@@ -1,0 +1,32 @@
+diff --git a/QSSI.14/device/qcom/qssi/BoardConfig.mk b/QSSI.14/device/qcom/qssi/BoardConfig.mk
+index bf7d289..b1aeb0c 100644
+--- a/QSSI.14/device/qcom/qssi/BoardConfig.mk
++++ b/QSSI.14/device/qcom/qssi/BoardConfig.mk
+@@ -174,3 +174,7 @@ DIRECTED_RAMDISK_SNAPSHOT := true
+ -include vendor/qcom/defs/board-defs/system/*.mk
+ #################################################################################
+ include device/qcom/sepolicy/SEPolicy.mk
++
++#include device/empa/smartnfc/nfc_pn7220/mk/BoardConfigNfc.mk
++# Include NXP NFC BoardConfig
++include vendor/nxp/nfc/BoardConfigNfc.mk
+\ No newline at end of file
+diff --git a/QSSI.14/device/qcom/qssi/qssi.mk b/QSSI.14/device/qcom/qssi/qssi.mk
+index ff772a1..e9cb804 100644
+--- a/QSSI.14/device/qcom/qssi/qssi.mk
++++ b/QSSI.14/device/qcom/qssi/qssi.mk
+@@ -130,7 +130,7 @@ TARGET_USES_QCOM_BSP := false
+ # RRO configuration
+ TARGET_USES_RRO := true
+ 
+-TARGET_USES_NQ_NFC := true
++TARGET_USES_NQ_NFC := false
+ 
+ 
+ # default is nosdcard, S/W button enabled in resource
+@@ -319,3 +319,5 @@ $(call inherit-product-if-exists, vendor/qcom/defs/product-defs/system/*.mk)
+ PRODUCT_PACKAGES_REMOVE += \
+     Cam2test \
+     Camera2
++
++$(call inherit-product-if-exists, device/empa/smartnfc/smartnfc.mk)

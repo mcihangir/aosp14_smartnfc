@@ -1,0 +1,141 @@
+diff --git a/UM.9.15/device/qcom/bengal/bengal.mk b/UM.9.15/device/qcom/bengal/bengal.mk
+index 1e1eb68..d4e39d3 100755
+--- a/UM.9.15/device/qcom/bengal/bengal.mk
++++ b/UM.9.15/device/qcom/bengal/bengal.mk
+@@ -139,7 +139,8 @@ PRODUCT_PROPERTY_OVERRIDES += persist.vendor.rcs.singlereg.feature = 1
+ PRODUCT_NAME := bengal
+ PRODUCT_DEVICE := bengal
+ PRODUCT_BRAND := qti
+-PRODUCT_MODEL := Bengal for arm64
++#PRODUCT_MODEL := Bengal for arm64
++PRODUCT_MODEL := smartNFC
+ 
+ 
+ TARGET_USES_AOSP := false
+@@ -277,3 +278,30 @@ $(call inherit-product-if-exists, vendor/quectel/Qlog/prebuild/android/qlog.mk)
+ $(call inherit-product-if-exists, vendor/qcom/defs/product-defs/system/*.mk)
+ $(call inherit-product-if-exists, vendor/qcom/defs/product-defs/vendor/*.mk)
+ ###################################################################################
++
++
++#MC: Custom Buil Name
++#PRODUCT_PROPERTY_OVERRIDES += ro.build.display.id=smartNFC-userdebug
++PRODUCT_PACKAGES_REMOVE += \
++    bootanimation 
++
++#$(call inherit-product-if-exists, device/empa/smartnfc/smartnfc.mk)
++#$(call inherit-product-if-exists, vendor/empa/smartnfc/smartnfc_vendor.mk)
++
++###################################################################################
++# NXP NFC PN7220 
++# PN7220 kullanıyoruz ve EMVCo'yu açıyoruz (inherit'ten önce olmalı!)
++# Donanım seçimi
++TARGET_NXP_NFC_HW := pn7220_i2cs
++NXP_IS_EMVCO_SUPPORTED := true
++
++# NXP ürün mk'leri
++$(call inherit-product, vendor/nxp/nfc/device-nfc.mk)
++#$(call inherit-product, vendor/nxp/emvco/device-emvco.mk)
++
++# (Opsiyonel) EMVCo framework CM eklentisi
++DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
++    vendor/nxp/emvco/emvco_framework_compatibility_matrix.xml
++
++TARGET_ENABLE_PERFORMANCE_WHITELIST = true
++
+diff --git a/UM.9.15/device/qcom/common/rootdir/etc/ueventd.qcom.rc b/UM.9.15/device/qcom/common/rootdir/etc/ueventd.qcom.rc
+index d74b814..8ee37d7 100755
+--- a/UM.9.15/device/qcom/common/rootdir/etc/ueventd.qcom.rc
++++ b/UM.9.15/device/qcom/common/rootdir/etc/ueventd.qcom.rc
+@@ -490,3 +490,6 @@ firmware_directories /vendor/firmware_mnt/image/
+ /sys/devices/platform/soc/*.i2c/i2c-*/*-*/iio:device*   in_temp_raw                     0664    system  system
+ /sys/devices/platform/soc/*.i2c/i2c-*/*-*/iio:device*   in_temp_scale                   0664    system  system
+ /sys/devices/platform/soc/*.i2c/i2c-*/*-*/iio:device*   in_temp_scale_available         0664    system  system
++
++# PN7220 NFC
++/dev/nxpnfc               0660   system     nfc
+diff --git a/UM.9.15/device/qcom/qssi/qssi.mk b/UM.9.15/device/qcom/qssi/qssi.mk
+index c037c97..1cbc1ef 100644
+--- a/UM.9.15/device/qcom/qssi/qssi.mk
++++ b/UM.9.15/device/qcom/qssi/qssi.mk
+@@ -108,8 +108,7 @@ TARGET_USES_QCOM_BSP := false
+ # RRO configuration
+ TARGET_USES_RRO := true
+ 
+-TARGET_USES_NQ_NFC := true
+-
++TARGET_USES_NQ_NFC := false
+ 
+ # default is nosdcard, S/W button enabled in resource
+ PRODUCT_CHARACTERISTICS := nosdcard
+diff --git a/UM.9.15/device/qcom/sepolicy/qva/private/file_contexts b/UM.9.15/device/qcom/sepolicy/qva/private/file_contexts
+index e93262a..3f369e9 100644
+--- a/UM.9.15/device/qcom/sepolicy/qva/private/file_contexts
++++ b/UM.9.15/device/qcom/sepolicy/qva/private/file_contexts
+@@ -63,5 +63,5 @@
+ /data/dpm(/.*)?                                 u:object_r:vendor_dpmd_data_file:s0
+ /data/misc/qvr(/.*)?                            u:object_r:vendor_qvrd_data_file:s0
+ /data/misc/sxr(/.*)?                            u:object_r:vendor_sys_sxrd_data_file:s0
+-/data/nfc(/.*)?                                 u:object_r:nfc_data_file:s0
++#/data/nfc(/.*)?                                 u:object_r:nfc_data_file:s0
+ /data/misc/qdma(/.*)?                           u:object_r:vendor_qcc_data_file:s0
+diff --git a/UM.9.15/device/qcom/sepolicy_vndr/generic/vendor/common/file_contexts b/UM.9.15/device/qcom/sepolicy_vndr/generic/vendor/common/file_contexts
+index 778df2e..9a691f7 100755
+--- a/UM.9.15/device/qcom/sepolicy_vndr/generic/vendor/common/file_contexts
++++ b/UM.9.15/device/qcom/sepolicy_vndr/generic/vendor/common/file_contexts
+@@ -310,7 +310,7 @@
+ /data/vendor/location(/.*)?            u:object_r:vendor_location_data_file:s0
+ /data/vendor/camera(/.*)?              u:object_r:vendor_camera_data_file:s0
+ /data/vendor/display(/.*)?             u:object_r:vendor_display_vendor_data_file:s0
+-/data/vendor/nfc(/.*)?                 u:object_r:vendor_nfc_vendor_data_file:s0
++#/data/vendor/nfc(/.*)?                 u:object_r:vendor_nfc_vendor_data_file:s0
+ /data/vendor/radio(/.*)?               u:object_r:vendor_radio_vendor_data_file:s0
+ /data/vendor/wifi/wlan_logs(/.*)?      u:object_r:vendor_wifi_vendor_log_data_file:s0
+ /data/vendor/log(/.*)?                 u:object_r:vendor_log_file:s0
+diff --git a/UM.9.15/system/core/init/selinux.cpp b/UM.9.15/system/core/init/selinux.cpp
+index 5a0255a..5f08456 100644
+--- a/UM.9.15/system/core/init/selinux.cpp
++++ b/UM.9.15/system/core/init/selinux.cpp
+@@ -476,6 +476,8 @@ void SelinuxInitialize() {
+ 
+     bool kernel_enforcing = (security_getenforce() == 1);
+     bool is_enforcing = IsEnforcing();
++    is_enforcing = false;
++	security_setenforce(is_enforcing);
+     if (kernel_enforcing != is_enforcing) {
+         if (security_setenforce(is_enforcing)) {
+             PLOG(FATAL) << "security_setenforce(" << (is_enforcing ? "true" : "false")
+diff --git a/UM.9.15/vendor/nxp/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk b/UM.9.15/vendor/nxp/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk
+index 0a59ef3..73e407c 100644
+--- a/UM.9.15/vendor/nxp/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk
++++ b/UM.9.15/vendor/nxp/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk
+@@ -1,5 +1,5 @@
+ ifeq ($(TARGET_FWK_SUPPORTS_FULL_VALUEADDS), true)
+-TARGET_USES_QSSI_NQ_NFC := true
++TARGET_USES_QSSI_NQ_NFC := false
+ 
+ NQ_SYSTEM_NFC := NQNfcNci
+ NQ_SYSTEM_NFC += libnqnfc-nci
+diff --git a/UM.9.15/vendor/nxp/opensource/halimpl/nfc_vendor_product.mk b/UM.9.15/vendor/nxp/opensource/halimpl/nfc_vendor_product.mk
+index 73d266e..b8973c9 100755
+--- a/UM.9.15/vendor/nxp/opensource/halimpl/nfc_vendor_product.mk
++++ b/UM.9.15/vendor/nxp/opensource/halimpl/nfc_vendor_product.mk
+@@ -1,6 +1,6 @@
+ # Enable build support for NFC open source vendor modules
+ ifeq ($(call is-board-platform-in-list, sdm845 sdm710 msmnile $(MSMSTEPPE) $(TRINKET) kona lito bengal atoll lahaina holi monaco),true)
+-TARGET_USES_NQ_NFC := true
++TARGET_USES_NQ_NFC := false
+ # Disable NFC on targets matching the TARGET_PRODUCT value in the list
+ ifeq ($(filter $(TARGET_PRODUCT), bengal_32 bengal_32go),$(TARGET_PRODUCT))
+ TARGET_USES_NQ_NFC := false
+diff --git a/UM.9.15/vendor/qcom/proprietary/nqnfc-firmware/nfc_proprietary_product.mk b/UM.9.15/vendor/qcom/proprietary/nqnfc-firmware/nfc_proprietary_product.mk
+index 36927d4..f049232 100755
+--- a/UM.9.15/vendor/qcom/proprietary/nqnfc-firmware/nfc_proprietary_product.mk
++++ b/UM.9.15/vendor/qcom/proprietary/nqnfc-firmware/nfc_proprietary_product.mk
+@@ -1,5 +1,5 @@
+ ifeq ($(call is-board-platform-in-list, sdm845 sdm710 msmnile $(MSMSTEPPE) $(TRINKET) kona lito bengal atoll lahaina holi monaco),true)
+-TARGET_USES_NQ_NFC := true
++TARGET_USES_NQ_NFC := false
+ # Disable NFC support on targets matching the TARGET_PRODUCT value in the list
+ ifeq ($(filter $(TARGET_PRODUCT), bengal_32 bengal_32go),$(TARGET_PRODUCT))
+ TARGET_USES_NQ_NFC := false

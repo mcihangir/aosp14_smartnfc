@@ -2,7 +2,9 @@ LOCAL_PATH := $(call my-dir)
 include $(call all-subdir-makefiles)
 # Include package removal definitions
 include device/empa/smartnfc/smartnfc_remove_packages.mk
-include device/empa/smartnfc/sepolicy/SEPolicy.mk
+# --- Pull in local SEPolicy additions
+$(call inherit-product, device/empa/smartnfc/sepolicy/SEPolicy.mk)
+#include device/empa/smartnfc/sepolicy/SEPolicy.mk
 
 ######################################################################
 # Boot Optimization
@@ -127,11 +129,39 @@ PRODUCT_PACKAGES += \
     SmartPeripheral \
     OpenCamera \
     AngryBirds \
+    TagInfo \
     smartnfc.hardware.led-ndk_platform \
     smartnfc.hardware.led-java \
-    smartdaemon
+    smartdaemon 
 
 #    Firefox \
 #    GeometryDash \
 #    smartservice-api
 #    SmartService \
+######################################################################
+# --- PN7220 seçimi (inherit'ten ÖNCE!) ---
+TARGET_NXP_NFC_HW       := pn7220_i2cs
+
+$(call inherit-product, vendor/nxp/nfc/device-nfc.mk)
+
+# Keep only AOSP NFC
+PRODUCT_PACKAGES += \
+    NfcNci
+
+# Remove vendor/NQ/QTI stacks & tools if present
+PRODUCT_PACKAGES_REMOVE += \
+    NQNfcNci \
+    Nfc_st \
+    nqnfcinfo \
+    nqnfcservice
+
+PRODUCT_PACKAGES_REMOVE += NQNfcNci Nfc_st nqnfcinfo nqnfcservice
+PRODUCT_SYSTEM_EXT_REMOVE_PACKAGES += NQNfcNci Nfc_st nqnfcinfo nqnfcservice
+STM_SYSTEM_NFC :=
+
+
+# (Opsiyonel) SystemExt veya Product bölgelerinde bu apk’ları getiren overlay varsa kapat
+
+
+# Board-level NFC konfig (varsa)
+include vendor/nxp/nfc/BoardConfigNfc.mk

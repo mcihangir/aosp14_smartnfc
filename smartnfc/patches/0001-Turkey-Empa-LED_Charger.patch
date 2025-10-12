@@ -1,0 +1,191 @@
+From b310664c7f98de4a853a2b0243d012bf712c17a1 Mon Sep 17 00:00:00 2001
+From: Zoran Cvejic <zoran.cvejic@quectel.com>
+Date: Wed, 27 Aug 2025 11:50:49 +0200
+Subject: [PATCH] Repository branches:Submitter Email prefix:BSP:Setup LED,
+ During USB Charging
+
+Change Type:new requirements.
+Reason and Solution:Required by Customer.
+Jira ID: FAE-183584
+Affected Function Name:BSP
+Applicable project:Turkey - Empa - SC200E
+Security Vulnerability Fixing:NA.
+SW-Test:N.
+HW-Test:N.
+---
+ .../drivers/power/supply/qcom/qpnp-smblite.c  | 78 +++++++++++++++++++
+ .../drivers/power/supply/qcom/smblite-lib.h   |  1 +
+ .../devicetree-4.19/qcom/pm2250.dtsi          |  4 +-
+ .../devicetree-4.19/qcom/scuba-idp.dtsi       |  4 +-
+ .../devicetree-4.19/qcom/scuba-iot-idp.dtsi   |  4 +-
+ 5 files changed, 85 insertions(+), 6 deletions(-)
+
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/power/supply/qcom/qpnp-smblite.c b/UM.9.15/kernel/msm-4.19/drivers/power/supply/qcom/qpnp-smblite.c
+index 9c1f8e9f3b8..0e0fe646e2b 100755
+--- a/UM.9.15/kernel/msm-4.19/drivers/power/supply/qcom/qpnp-smblite.c
++++ b/UM.9.15/kernel/msm-4.19/drivers/power/supply/qcom/qpnp-smblite.c
+@@ -18,10 +18,81 @@
+ #include <linux/iio/consumer.h>
+ #include <linux/pmic-voter.h>
+ #include <linux/usb/typec.h>
++#include <linux/leds.h>
+ #include "smblite-reg.h"
+ #include "smblite-lib.h"
+ #include "schgm-flashlite.h"
+ 
++#define CHG_LED_SINK_EN 0x16C8
++#define CHG_LED_SINK_CFG 0x16C9
++#define CHG_LED_SINK_VALUE 0x3f
++#define CHGR_LED_STAT_MASK 1
++#define CHGR_LED_ON 0x4
++#define CHGR_LED_OFF 0x0
++
++static void smblite_chgr_led_brightness_set(struct led_classdev *cdev, enum led_brightness value)
++{
++	struct smb_charger *chip = container_of(cdev, struct smb_charger, led_cdev);
++	u8 reg;
++	//u8 reg1;
++	int rc;
++	/* rc = smblite_lib_read(chip, CHG_LED_SINK_EN, &reg);
++	if (rc < 0) {
++	pr_err("Couldn't read POWER_PATH_STATUS rc=%d\n",rc);
++	} */
++	if (value > LED_FULL)
++		value = LED_FULL;
++	pr_err("chy set the charger led brightness to value=%d\n", value);
++	reg = (value > LED_OFF) ? CHGR_LED_ON : CHGR_LED_OFF;
++	//reg1 = (value > LED_OFF) ? CHG_LED_SINK_VALUE : CHGR_LED_OFF;
++	rc = smblite_lib_write(chip, CHG_LED_SINK_CFG, CHG_LED_SINK_VALUE);
++	if (rc)
++		pr_err("Failed to write charger led CFG\n");
++	// rc = smblite_lib_masked_write(chip, CHG_LED_SINK_EN, reg, reg);
++	rc = smblite_lib_write(chip, CHG_LED_SINK_EN, reg);
++	if (rc)
++		pr_err("Failed to write charger led\n");
++}
++
++static enum led_brightness smblite_chgr_led_brightness_get(struct led_classdev *cdev)
++{
++	struct smb_charger *chip = container_of(cdev, struct smb_charger,led_cdev);
++	u8 reg_val, chgr_led_sts;
++	int rc;
++	rc = smblite_lib_read(chip, CHG_LED_SINK_EN, &reg_val);
++	if (rc) {
++		pr_err("Failed to read charger led\n");
++		return rc;
++	}
++
++	chgr_led_sts = reg_val & CHGR_LED_STAT_MASK;
++	pr_err("charger led brightness chgr_led_sts=%d\n", chgr_led_sts);
++	return (chgr_led_sts == CHGR_LED_ON) ? LED_FULL: LED_OFF;
++}
++
++static int smblite_register_chgr_led(struct smb_charger *chip)
++{
++	int rc;
++	chip->led_cdev.name = "red"; // "sink_led";
++	chip->led_cdev.brightness_set = smblite_chgr_led_brightness_set;
++	chip->led_cdev.brightness_get = smblite_chgr_led_brightness_get;
++	rc = led_classdev_register(chip->dev, &chip->led_cdev);
++	if (rc)
++		pr_err("unable to register charger led, rc=%d\n", rc);
++	return rc;
++};
++
++static void smblite_chgr_led_init(struct smb_charger *chip)
++{
++	int rc;
++	rc = smblite_lib_write(chip, CHG_LED_SINK_EN, CHGR_LED_ON);
++	if (rc)
++		pr_err("Failed to write charger led\n");
++	rc = smblite_lib_write(chip, CHG_LED_SINK_CFG, CHG_LED_SINK_VALUE);
++	if (rc)
++		pr_err("Failed to write charger led\n");
++}
++
+ static struct power_supply_desc usb_psy_desc;
+ 
+ static struct smb_params smblite_params = {
+@@ -1291,6 +1362,13 @@ static int smblite_init_hw(struct smblite *chip)
+ 		return rc;
+ 	}
+ 
++	rc = smblite_register_chgr_led(chg);
++	if (rc) {
++		pr_err("unable to register charger led rc=%d\n", rc);
++		return rc;
++	}
++	smblite_chgr_led_init(chg);
++
+ 	rc = smblite_lib_icl_override(chg, HW_AUTO_MODE);
+ 	if (rc < 0) {
+ 		pr_err("Couldn't disable ICL override rc=%d\n", rc);
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/power/supply/qcom/smblite-lib.h b/UM.9.15/kernel/msm-4.19/drivers/power/supply/qcom/smblite-lib.h
+index 8c33d17753e..710c4659d6b 100755
+--- a/UM.9.15/kernel/msm-4.19/drivers/power/supply/qcom/smblite-lib.h
++++ b/UM.9.15/kernel/msm-4.19/drivers/power/supply/qcom/smblite-lib.h
+@@ -228,6 +228,7 @@ struct smb_iio {
+ 
+ struct smb_charger {
+ 	struct device		*dev;
++	struct led_classdev led_cdev;
+ 	char			*name;
+ 	struct regmap		*regmap;
+ 	struct smb_irq_info	*irq_info;
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/pm2250.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/pm2250.dtsi
+index b2890e23c77..542eea79ccb 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/pm2250.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/pm2250.dtsi
+@@ -388,7 +388,7 @@
+ 			#pwm-cells = <2>;
+ 		};
+ 
+-		pm2250_rg_leds: qcom,rg_leds {
++		/*pm2250_rg_leds: qcom,rg_leds {
+ 			compatible = "pwm-leds";
+ 
+ 			red {
+@@ -404,7 +404,7 @@
+ 				max-brightness = <255>;
+ 				linux,default-trigger = "timer";
+ 			};
+-		};
++		};*/
+ 
+ 		pm2250_flash: qcom,flash_led@d300 {
+ 			compatible = "qcom,pm2250-flash-led";
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-idp.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-idp.dtsi
+index 5b4e4579c82..a633b010d8d 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-idp.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-idp.dtsi
+@@ -13,9 +13,9 @@
+ 	};
+ };
+ 
+-&pm2250_rg_leds {
++/*&pm2250_rg_leds {
+ 	status = "ok";
+-};
++};*/
+ 
+ &pm2250_qg {
+ 	qcom,battery-data = <&scuba_batterydata>;
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
+index c460a5f5c83..26271bb136e 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
+@@ -14,9 +14,9 @@
+ 	};
+ };
+ 
+-&pm2250_rg_leds {
++/*&pm2250_rg_leds {
+ 	status = "ok";
+-};
++};*/
+ 
+ 
+ &pm2250_qg {
+-- 
+2.43.0
+

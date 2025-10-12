@@ -36,5 +36,9 @@
         <permission name="android.permission.MODIFY_AUDIO_SETTINGS"/>
         <permission name="android.permission.RECORD_AUDIO"/>
 
+        <!-- NFC Permission -->        
+        <permission name="android.permission.NFC"/>
+        <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
+
     </privapp-permissions>
 </permissions>

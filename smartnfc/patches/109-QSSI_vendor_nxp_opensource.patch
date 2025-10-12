@@ -1,0 +1,12 @@
+diff --git a/QSSI.14/vendor/nxp/opensource/commonsys/external/libnfc-nci/SN100x/src/Android.bp b/QSSI.14/vendor/nxp/opensource/commonsys/external/libnfc-nci/SN100x/src/Android.bp
+index 6a348c8..1902345 100755
+--- a/QSSI.14/vendor/nxp/opensource/commonsys/external/libnfc-nci/SN100x/src/Android.bp
++++ b/QSSI.14/vendor/nxp/opensource/commonsys/external/libnfc-nci/SN100x/src/Android.bp
+@@ -5,6 +5,7 @@ cc_library_shared {
+         },
+     },
+     name: "libsn100nfc-nci",
++    enabled: false,
+     system_ext_specific: true,
+     shared_libs: [
+         "libcutils",

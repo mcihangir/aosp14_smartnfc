@@ -1,0 +1,12 @@
+diff --git a/QSSI.14/build/bazel/common.bazelrc b/QSSI.14/build/bazel/common.bazelrc
+index cef887a..2921433 100644
+--- a/QSSI.14/build/bazel/common.bazelrc
++++ b/QSSI.14/build/bazel/common.bazelrc
+@@ -3,6 +3,7 @@
+ # thrashing the output directory when switching between top level target
+ # --platforms values.
+ build --experimental_platform_in_output_dir
++startup --batch
+ 
+ # Use toolchain resolution to find the cc toolchain.
+ build --incompatible_enable_cc_toolchain_resolution

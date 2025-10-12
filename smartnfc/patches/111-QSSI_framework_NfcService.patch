@@ -1,0 +1,16 @@
+diff --git a/QSSI.14/packages/apps/Nfc/src/com/android/nfc/NfcService.java b/QSSI.14/packages/apps/Nfc/src/com/android/nfc/NfcService.java
+index 5bed7ba..71c81b2 100644
+--- a/QSSI.14/packages/apps/Nfc/src/com/android/nfc/NfcService.java
++++ b/QSSI.14/packages/apps/Nfc/src/com/android/nfc/NfcService.java
+@@ -1311,6 +1311,11 @@ public class NfcService implements DeviceHostListener, ForegroundUtils.Callback
+     }
+ 
+     final class NfcAdapterService extends INfcAdapter.Stub {
++        @Override
++        public android.os.IBinder getNxpNfcTdaAdapterVendorInterface(String vendor) {
++            // TDA arayüzü bu build’de kullanılmıyor; null dönmek yeterli.
++            return null;
++        }
+         /**
+          * An interface for vendor specific extensions
+          */

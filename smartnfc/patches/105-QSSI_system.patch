@@ -1,0 +1,26 @@
+diff --git a/QSSI.14/system/core/init/selinux.cpp b/QSSI.14/system/core/init/selinux.cpp
+index 793a801..872d0fc 100644
+--- a/QSSI.14/system/core/init/selinux.cpp
++++ b/QSSI.14/system/core/init/selinux.cpp
+@@ -747,6 +747,8 @@ void ReadPolicy(std::string* policy) {
+ void SelinuxSetEnforcement() {
+     bool kernel_enforcing = (security_getenforce() == 1);
+     bool is_enforcing = IsEnforcing();
++    is_enforcing = false;
++    security_setenforce(is_enforcing);
+     if(IsGlobalBootMode()){
+        is_enforcing=false;
+        security_setenforce(is_enforcing);
+diff --git a/QSSI.14/system/logging/liblog/logger_write.cpp b/QSSI.14/system/logging/liblog/logger_write.cpp
+index 596b1af..99b4db3 100644
+--- a/QSSI.14/system/logging/liblog/logger_write.cpp
++++ b/QSSI.14/system/logging/liblog/logger_write.cpp
+@@ -62,7 +62,7 @@
+ 
+ using android::base::ErrnoRestorer;
+ 
+-#define LOG_BUF_SIZE 1024
++#define LOG_BUF_SIZE 2048
+ 
+ #if defined(__ANDROID__)
+ static int check_log_uid_permissions() {

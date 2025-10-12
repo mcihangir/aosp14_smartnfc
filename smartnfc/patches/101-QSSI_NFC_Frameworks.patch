@@ -1,0 +1,78 @@
+diff --git a/QSSI.14/frameworks/base/core/java/android/nfc/INfcAdapter.aidl b/QSSI.14/frameworks/base/core/java/android/nfc/INfcAdapter.aidl
+index 9e8674b..482cf45 100644
+--- a/QSSI.14/frameworks/base/core/java/android/nfc/INfcAdapter.aidl
++++ b/QSSI.14/frameworks/base/core/java/android/nfc/INfcAdapter.aidl
+@@ -79,6 +79,7 @@ interface INfcAdapter
+     boolean isControllerAlwaysOnSupported();
+     void registerControllerAlwaysOnListener(in INfcControllerAlwaysOnListener listener);
+     void unregisterControllerAlwaysOnListener(in INfcControllerAlwaysOnListener listener);
++    IBinder getNxpNfcTdaAdapterVendorInterface(in String vendor);
+     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+     boolean isTagIntentAppPreferenceSupported();
+     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+diff --git a/QSSI.14/frameworks/base/core/java/android/os/BinderProxy.java b/QSSI.14/frameworks/base/core/java/android/os/BinderProxy.java
+index 1929a4d..e98e0ab 100644
+--- a/QSSI.14/frameworks/base/core/java/android/os/BinderProxy.java
++++ b/QSSI.14/frameworks/base/core/java/android/os/BinderProxy.java
+@@ -227,7 +227,7 @@ public final class BinderProxy implements IBinder {
+                 Log.v(Binder.TAG, "BinderProxy map growth! bucket size = " + size
+                         + " total = " + totalSize);
+                 mWarnBucketSize += WARN_INCREMENT;
+-                if (Build.IS_DEBUGGABLE && totalSize >= CRASH_AT_SIZE) {
++                /*if (Build.IS_DEBUGGABLE && totalSize >= CRASH_AT_SIZE) {
+                     // Use the number of uncleared entries to determine whether we should
+                     // really report a histogram and crash. We don't want to fundamentally
+                     // change behavior for a debuggable process, so we GC only if we are
+@@ -246,7 +246,7 @@ public final class BinderProxy implements IBinder {
+                                 + (totalSize - totalUnclearedSize) + " of " + totalSize
+                                 + " are cleared");
+                     }
+-                }
++                }*/
+             }
+         }
+ 
+diff --git a/QSSI.14/frameworks/base/core/res/res/values/config.xml b/QSSI.14/frameworks/base/core/res/res/values/config.xml
+index dc1d73f..04ebd96 100644
+--- a/QSSI.14/frameworks/base/core/res/res/values/config.xml
++++ b/QSSI.14/frameworks/base/core/res/res/values/config.xml
+@@ -2803,7 +2803,7 @@
+     <bool name="config_syncstorageengine_masterSyncAutomatically">true</bool>
+ 
+     <!--  Maximum number of supported users -->
+-    <integer name="config_multiuserMaximumUsers">1</integer>
++    <integer name="config_multiuserMaximumUsers">2</integer>
+ 
+     <!-- Maximum number of users we allow to be running at a time -->
+     <integer name="config_multiuserMaxRunningUsers">3</integer>
+@@ -2863,7 +2863,7 @@
+     <bool name="config_canSwitchToHeadlessSystemUser">false</bool>
+ 
+     <!-- Whether UI for multi user should be shown -->
+-    <bool name="config_enableMultiUserUI">false</bool>
++    <bool name="config_enableMultiUserUI">true</bool>
+ 
+     <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
+      with admin privileges and admin privileges can be granted/revoked from existing users. -->
+diff --git a/QSSI.14/frameworks/base/services/core/java/com/android/server/Watchdog.java b/QSSI.14/frameworks/base/services/core/java/com/android/server/Watchdog.java
+index a3a26d4..1e8131f 100644
+--- a/QSSI.14/frameworks/base/services/core/java/com/android/server/Watchdog.java
++++ b/QSSI.14/frameworks/base/services/core/java/com/android/server/Watchdog.java
+@@ -198,7 +198,7 @@ public class Watchdog implements Dumpable {
+     private final HandlerChecker mMonitorChecker;
+     private ActivityManagerService mActivity;
+     private IActivityController mController;
+-    private boolean mAllowRestart = true;
++    private boolean mAllowRestart = false;
+     // We start with DEFAULT_TIMEOUT. This will then be update with the timeout values from Settings
+     // once the settings provider is initialized.
+     private volatile long mWatchdogTimeoutMillis = DEFAULT_TIMEOUT;
+@@ -578,7 +578,7 @@ public class Watchdog implements Dumpable {
+ 
+     public void setAllowRestart(boolean allowRestart) {
+         synchronized (mLock) {
+-            mAllowRestart = allowRestart;
++            mAllowRestart = false;
+         }
+     }
+ 

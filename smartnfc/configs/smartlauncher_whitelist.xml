@@ -7,4 +7,5 @@
     <package name="com.rovio.angrybirds"/>
     <package name="com.qualcomm.qti.sensors.qsensortest"/>
     <package name="org.chromium.webview_shell"/>
+    <package name="com.nxp.taginfolite"/>
 </whitelist>

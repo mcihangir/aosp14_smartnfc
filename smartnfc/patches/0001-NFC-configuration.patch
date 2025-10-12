@@ -1,0 +1,1430 @@
+From d728c67d7e88aa006377928a1928100cd013aa3b Mon Sep 17 00:00:00 2001
+From: Milos Milivojevic <milos.milivojevic@quectel.com>
+Date: Wed, 23 Jul 2025 11:07:29 +0200
+Subject: [PATCH] NFC configuration
+
+---
+ .../arm/configs/vendor/bengal-perf_defconfig  |   3 +-
+ .../arch/arm/configs/vendor/bengal_defconfig  |   3 +-
+ .../arm64/configs/vendor/bengal_defconfig     |   3 +-
+ UM.9.15/kernel/msm-4.19/drivers/Makefile      |   1 +
+ UM.9.15/kernel/msm-4.19/drivers/nfc/Kconfig   |   2 +
+ UM.9.15/kernel/msm-4.19/drivers/nfc/Makefile  |   1 +
+ .../kernel/msm-4.19/drivers/nfc/pn7220/Kbuild |   6 +
+ .../msm-4.19/drivers/nfc/pn7220/Kconfig       |  13 +
+ .../msm-4.19/drivers/nfc/pn7220/Makefile      |  10 +
+ .../msm-4.19/drivers/nfc/pn7220/common.c      | 446 ++++++++++++++++
+ .../msm-4.19/drivers/nfc/pn7220/common.h      | 203 +++++++
+ .../msm-4.19/drivers/nfc/pn7220/i2c_drv.c     | 500 ++++++++++++++++++
+ .../msm-4.19/drivers/nfc/pn7220/i2c_drv.h     |  48 ++
+ .../devicetree-4.19/qcom/scuba-iot-idp.dtsi   |  15 +
+ .../devicetree-4.19/qcom/scuba.dtsi           |   6 +-
+ 15 files changed, 1256 insertions(+), 4 deletions(-)
+ create mode 100644 UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Kbuild
+ create mode 100644 UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Kconfig
+ create mode 100644 UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Makefile
+ create mode 100644 UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/common.c
+ create mode 100644 UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/common.h
+ create mode 100644 UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/i2c_drv.c
+ create mode 100644 UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/i2c_drv.h
+
+diff --git a/UM.9.15/kernel/msm-4.19/arch/arm/configs/vendor/bengal-perf_defconfig b/UM.9.15/kernel/msm-4.19/arch/arm/configs/vendor/bengal-perf_defconfig
+index 603db85667d..38decf70228 100755
+--- a/UM.9.15/kernel/msm-4.19/arch/arm/configs/vendor/bengal-perf_defconfig
++++ b/UM.9.15/kernel/msm-4.19/arch/arm/configs/vendor/bengal-perf_defconfig
+@@ -244,7 +244,8 @@ CONFIG_MSM_BT_POWER=y
+ CONFIG_BTFM_SLIM_WCN3990=y
+ CONFIG_CFG80211=y
+ CONFIG_RFKILL=y
+-CONFIG_NFC_NQ=y
++CONFIG_NFC=y
++CONFIG_NXP_NFC_I2C=y
+ CONFIG_DEVTMPFS=y
+ CONFIG_FW_LOADER_USER_HELPER=y
+ CONFIG_FW_LOADER_USER_HELPER_FALLBACK=y
+diff --git a/UM.9.15/kernel/msm-4.19/arch/arm/configs/vendor/bengal_defconfig b/UM.9.15/kernel/msm-4.19/arch/arm/configs/vendor/bengal_defconfig
+index cda9c099e67..e4db5a97009 100755
+--- a/UM.9.15/kernel/msm-4.19/arch/arm/configs/vendor/bengal_defconfig
++++ b/UM.9.15/kernel/msm-4.19/arch/arm/configs/vendor/bengal_defconfig
+@@ -259,7 +259,8 @@ CONFIG_BTFM_SLIM_WCN3990=y
+ CONFIG_CFG80211=y
+ CONFIG_CFG80211_INTERNAL_REGDB=y
+ CONFIG_RFKILL=y
+-CONFIG_NFC_NQ=y
++CONFIG_NFC=y
++CONFIG_NXP_NFC_I2C=y
+ CONFIG_DEVTMPFS=y
+ CONFIG_DEVTMPFS_MOUNT=y
+ CONFIG_FW_LOADER_USER_HELPER=y
+diff --git a/UM.9.15/kernel/msm-4.19/arch/arm64/configs/vendor/bengal_defconfig b/UM.9.15/kernel/msm-4.19/arch/arm64/configs/vendor/bengal_defconfig
+index 2ab99b73aef..50266f2fb25 100755
+--- a/UM.9.15/kernel/msm-4.19/arch/arm64/configs/vendor/bengal_defconfig
++++ b/UM.9.15/kernel/msm-4.19/arch/arm64/configs/vendor/bengal_defconfig
+@@ -277,7 +277,8 @@ CONFIG_BTFM_SLIM_WCN3990=y
+ CONFIG_CFG80211=y
+ CONFIG_CFG80211_INTERNAL_REGDB=y
+ CONFIG_RFKILL=y
+-CONFIG_NFC_NQ=y
++CONFIG_NFC=y
++CONFIG_NXP_NFC_I2C=y
+ CONFIG_FW_LOADER_USER_HELPER=y
+ CONFIG_FW_LOADER_USER_HELPER_FALLBACK=y
+ # CONFIG_FW_CACHE is not set
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/Makefile b/UM.9.15/kernel/msm-4.19/drivers/Makefile
+index a6926c7fb5f..95b91788d57 100755
+--- a/UM.9.15/kernel/msm-4.19/drivers/Makefile
++++ b/UM.9.15/kernel/msm-4.19/drivers/Makefile
+@@ -72,6 +72,7 @@ obj-$(CONFIG_FB_INTEL)          += video/fbdev/intelfb/
+ obj-$(CONFIG_PARPORT)		+= parport/
+ obj-$(CONFIG_NVM)		+= lightnvm/
+ obj-y				+= base/ block/ misc/ mfd/ nfc/
++obj-y				+= nfc/
+ obj-$(CONFIG_LIBNVDIMM)		+= nvdimm/
+ obj-$(CONFIG_DAX)		+= dax/
+ obj-$(CONFIG_DMA_SHARED_BUFFER) += dma-buf/
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/nfc/Kconfig b/UM.9.15/kernel/msm-4.19/drivers/nfc/Kconfig
+index 26e114f6c2e..9eb4c3ef2c8 100755
+--- a/UM.9.15/kernel/msm-4.19/drivers/nfc/Kconfig
++++ b/UM.9.15/kernel/msm-4.19/drivers/nfc/Kconfig
+@@ -58,6 +58,7 @@ source "drivers/nfc/st-nci/Kconfig"
+ source "drivers/nfc/nxp-nci/Kconfig"
+ source "drivers/nfc/s3fwrn5/Kconfig"
+ source "drivers/nfc/st95hf/Kconfig"
++source "drivers/nfc/pn7220/Kconfig"
+ endmenu
+ 
+ config NFC_NQ
+@@ -67,3 +68,4 @@ config NFC_NQ
+           This enables the NFC driver for NQx based devices.
+           This is for i2c connected version. NCI protocol logic
+           resides in the usermode and it has no other NFC dependencies.
++
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/nfc/Makefile b/UM.9.15/kernel/msm-4.19/drivers/nfc/Makefile
+index 5661fd6adf9..2fa9c1869df 100755
+--- a/UM.9.15/kernel/msm-4.19/drivers/nfc/Makefile
++++ b/UM.9.15/kernel/msm-4.19/drivers/nfc/Makefile
+@@ -18,3 +18,4 @@ obj-$(CONFIG_NFC_NXP_NCI)	+= nxp-nci/
+ obj-$(CONFIG_NFC_S3FWRN5)	+= s3fwrn5/
+ obj-$(CONFIG_NFC_ST95HF)	+= st95hf/
+ obj-$(CONFIG_NFC_NQ)            += nq-nci.o
++obj-y				+= pn7220/
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Kbuild b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Kbuild
+new file mode 100644
+index 00000000000..3d8605a3f7e
+--- /dev/null
++++ b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Kbuild
+@@ -0,0 +1,6 @@
++obj-$(CONFIG_NXP_NFC_I2C) := nxpnfc_i2c.o
++
++nxpnfc_i2c-y := common.o \
++             i2c_drv.o
++
++ccflags-y += -DDYNAMIC_DEBUG_MODULE
+\ No newline at end of file
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Kconfig b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Kconfig
+new file mode 100644
+index 00000000000..facfd412a1b
+--- /dev/null
++++ b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Kconfig
+@@ -0,0 +1,13 @@
++#
++# near field communication driver configuration
++#
++
++config NXP_NFC_I2C
++	tristate "NXP NCI based NFC I2C Slave Driver for SNxxx"
++	depends on I2C
++	help
++	  This enables the NFC driver for SNxxx based devices.
++	  This is for I2C connected version. NCI protocol logic
++	  resides in the usermode and it has no other NFC dependencies.
++
++	  If unsure, say N.
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Makefile b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Makefile
+new file mode 100644
+index 00000000000..123bea3f132
+--- /dev/null
++++ b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/Makefile
+@@ -0,0 +1,10 @@
++KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
++
++all:
++	$(MAKE) -C $(KERNEL_SRC) M=$(shell pwd) modules $(KBUILD_OPTIONS)
++
++modules_install:
++	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(shell pwd) modules_install
++
++clean:
++	$(MAKE) -C $(KERNEL_SRC) M=$(PWD) clean
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/common.c b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/common.c
+new file mode 100644
+index 00000000000..d650652190a
+--- /dev/null
++++ b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/common.c
+@@ -0,0 +1,446 @@
++/******************************************************************************
++ * Copyright (C) 2015, The Linux Foundation. All rights reserved.
++ * Copyright 2019-2023 NXP
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ *
++ ******************************************************************************/
++#include <linux/gpio.h>
++#include <linux/of_gpio.h>
++#include <linux/delay.h>
++
++#include "common.h"
++
++int nfc_parse_dt(struct device *dev, struct platform_configs *nfc_configs,
++		 uint8_t interface)
++{
++	struct device_node *np = dev->of_node;
++	struct platform_gpio *nfc_gpio = &nfc_configs->gpio;
++	unsigned int i = 0;
++
++	if (!np) {
++		pr_err("%s: nfc of_node NULL\n", __func__);
++		return -EINVAL;
++	}
++
++	/*Initialize all the gpios to -EINVAL*/
++	for (i = 0; i < sizeof(struct platform_gpio) / sizeof(unsigned int);
++	     i++) {
++		*((unsigned int *)nfc_gpio + i) = -EINVAL;
++	}
++	/* irq required for i2c based chips only */
++	if (interface == PLATFORM_IF_I2C || interface == PLATFORM_IF_SPI) {
++		nfc_gpio->irq = of_get_named_gpio(np, DTS_IRQ_GPIO_STR, 0);
++		if ((!gpio_is_valid(nfc_gpio->irq))) {
++			pr_err("%s: irq gpio invalid %d\n", __func__,
++			       nfc_gpio->irq);
++			return -EINVAL;
++		}
++		pr_info("%s: irq %d\n", __func__, nfc_gpio->irq);
++	}
++	nfc_gpio->ven = of_get_named_gpio(np, DTS_VEN_GPIO_STR, 0);
++	if ((!gpio_is_valid(nfc_gpio->ven))) {
++		pr_err("%s: ven gpio invalid %d\n", __func__, nfc_gpio->ven);
++		return -EINVAL;
++	}
++	nfc_gpio->mode_sw_nfcc = of_get_named_gpio(np, DTS_MODE_SW_STR, 0);
++	if ((!gpio_is_valid(nfc_gpio->mode_sw_nfcc)))
++		pr_warn("%s: mode_sw_nfcc gpio invalid %d\n", __func__,
++			nfc_gpio->mode_sw_nfcc);
++
++	nfc_gpio->led_red = of_get_named_gpio(np, DTS_RED_LED_STR, 0);
++	if ((!gpio_is_valid(nfc_gpio->led_red)))
++		pr_warn("%s: led_red gpio invalid %d\n", __func__,
++			nfc_gpio->led_red);
++
++	nfc_gpio->led_green = of_get_named_gpio(np, DTS_GREEN_LED_STR, 0);
++	if ((!gpio_is_valid(nfc_gpio->led_green)))
++		pr_warn("%s: led_green gpio invalid %d\n", __func__,
++			nfc_gpio->led_green);
++	pr_info("%s: %d, %d, %d, %d, %d\n", __func__, nfc_gpio->irq,
++		nfc_gpio->ven,nfc_gpio->mode_sw_nfcc,
++		nfc_gpio->led_red, nfc_gpio->led_green);
++
++	return 0;
++}
++
++void set_valid_gpio(int gpio, int value)
++{
++	if (gpio_is_valid(gpio)) {
++		pr_debug("%s: gpio %d value %d\n", __func__, gpio, value);
++		gpio_set_value(gpio, value % 2);
++		/* hardware dependent delay */
++		usleep_range(NFC_GPIO_SET_WAIT_TIME_US,
++			     NFC_GPIO_SET_WAIT_TIME_US + 100);
++	}
++}
++
++int get_valid_gpio(int gpio)
++{
++	int value = -EINVAL;
++
++	if (gpio_is_valid(gpio)) {
++		value = gpio_get_value(gpio);
++		pr_debug("%s: gpio %d value %d\n", __func__, gpio, value);
++	}
++	return value;
++}
++
++void gpio_set_ven(struct nfc_dev *nfc_dev, int value)
++{
++	struct platform_gpio *nfc_gpio = &nfc_dev->configs.gpio;
++
++	if (gpio_get_value(nfc_gpio->ven) != value) {
++		pr_debug("%s: value %d\n", __func__, value);
++
++		gpio_set_value(nfc_gpio->ven, value);
++		/* hardware dependent delay */
++		usleep_range(NFC_GPIO_SET_WAIT_TIME_US,
++			     NFC_GPIO_SET_WAIT_TIME_US + 100);
++	}
++}
++
++int configure_gpio(unsigned int gpio, int flag)
++{
++	int ret;
++
++	pr_debug("%s: nfc gpio [%d] flag [%01x]\n", __func__, gpio, flag);
++	if (gpio_is_valid(gpio)) {
++		ret = gpio_request(gpio, "nfc_gpio");
++		if (ret) {
++			pr_err("%s: unable to request nfc gpio [%d]\n",
++			       __func__, gpio);
++			return ret;
++		}
++		/* set direction and value for output pin */
++		if (flag & GPIO_OUTPUT) {
++			ret = gpio_direction_output(gpio, (GPIO_HIGH & flag));
++			pr_debug("%s: nfc o/p gpio %d level %d\n", __func__,
++				 gpio, gpio_get_value(gpio));
++		} else {
++			ret = gpio_direction_input(gpio);
++			pr_debug("%s: nfc i/p gpio %d\n", __func__, gpio);
++		}
++
++		if (ret) {
++			pr_err
++			    ("%s: unable to set direction for nfc gpio [%d]\n",
++			     __func__, gpio);
++			gpio_free(gpio);
++			return ret;
++		}
++		/* Consider value as control for input IRQ pin */
++		if (flag & GPIO_IRQ) {
++			ret = gpio_to_irq(gpio);
++			if (ret < 0) {
++				pr_err("%s: unable to set irq [%d]\n", __func__,
++				       gpio);
++				gpio_free(gpio);
++				return ret;
++			}
++			pr_debug("%s: gpio_to_irq successful [%d]\n", __func__,
++				 gpio);
++			return ret;
++		}
++	} else {
++		pr_err("%s: invalid gpio\n", __func__);
++		ret = -EINVAL;
++	}
++	return ret;
++}
++
++/* Configuring board leds*/
++int configure_leds(struct platform_gpio *nfc_gpio)
++{
++	int ret = 0;
++
++	ret = configure_gpio(nfc_gpio->led_green, GPIO_OUTPUT);
++	if (ret) {
++		pr_err
++			("%s: unable to request mode switch sp interface gpio [%d]\n",
++			 __func__, nfc_gpio->led_green);
++	}
++	ret = configure_gpio(nfc_gpio->led_red, GPIO_OUTPUT);
++	if (ret) {
++		pr_err
++			("%s: unable to request mode switch sp interface gpio [%d]\n",
++			 __func__, nfc_gpio->led_red);
++	}
++	return ret;
++}
++
++void gpio_free_all(struct nfc_dev *nfc_dev)
++{
++	struct platform_gpio *nfc_gpio = &nfc_dev->configs.gpio;
++	unsigned int i = 0;
++
++	for (i = 0; i < sizeof(struct platform_gpio) / sizeof(unsigned int);
++	     i++) {
++		if (gpio_is_valid(*((unsigned int *)nfc_gpio + i)))
++			gpio_free(*((unsigned int *)nfc_gpio + i));
++	}
++}
++
++void nfc_misc_unregister(struct nfc_dev *nfc_dev, int count)
++{
++	pr_debug("%s: entry\n", __func__);
++	device_destroy(nfc_dev->nfc_class, nfc_dev->devno);
++	cdev_del(&nfc_dev->c_dev);
++	class_destroy(nfc_dev->nfc_class);
++	unregister_chrdev_region(nfc_dev->devno, count);
++}
++
++int nfc_misc_register(struct nfc_dev *nfc_dev,
++		      const struct file_operations *nfc_fops, int count,
++		      char *devname, char *classname)
++{
++	int ret = 0;
++
++	ret = alloc_chrdev_region(&nfc_dev->devno, 0, count, devname);
++	if (ret < 0) {
++		pr_err("%s: failed to alloc chrdev region ret %d\n", __func__,
++		       ret);
++		return ret;
++	}
++	nfc_dev->nfc_class = class_create(THIS_MODULE, classname);
++	if (IS_ERR(nfc_dev->nfc_class)) {
++		ret = PTR_ERR(nfc_dev->nfc_class);
++		pr_err("%s: failed to register device class ret %d\n", __func__,
++		       ret);
++		unregister_chrdev_region(nfc_dev->devno, count);
++		return ret;
++	}
++	cdev_init(&nfc_dev->c_dev, nfc_fops);
++	ret = cdev_add(&nfc_dev->c_dev, nfc_dev->devno, count);
++	if (ret < 0) {
++		pr_err("%s: failed to add cdev ret %d\n", __func__, ret);
++		class_destroy(nfc_dev->nfc_class);
++		unregister_chrdev_region(nfc_dev->devno, count);
++		return ret;
++	}
++	nfc_dev->nfc_device = device_create(nfc_dev->nfc_class, NULL,
++					    nfc_dev->devno, nfc_dev, devname);
++	if (IS_ERR(nfc_dev->nfc_device)) {
++		ret = PTR_ERR(nfc_dev->nfc_device);
++		pr_err("%s: failed to create the device ret %d\n", __func__,
++		       ret);
++		cdev_del(&nfc_dev->c_dev);
++		class_destroy(nfc_dev->nfc_class);
++		unregister_chrdev_region(nfc_dev->devno, count);
++		return ret;
++	}
++	return 0;
++}
++
++static int led_switch_control_ioctl(struct nfc_dev *nfc_dev, unsigned long arg)
++{
++	int ret = 0;
++	struct platform_gpio *nfc_gpio = &nfc_dev->configs.gpio;
++
++	if (arg == RED_LED_ON || arg == RED_LED_OFF) {
++		set_valid_gpio(nfc_gpio->led_red, arg);
++	} else if (arg == GREEN_LED_ON || arg == GREEN_LED_OFF) {
++		set_valid_gpio(nfc_gpio->led_green, arg);
++	} else {
++		pr_err("%s: bad arg %lu\n", __func__, arg);
++		ret = -ENOIOCTLCMD;
++	}
++	return ret;
++
++}
++
++static int mode_switch_nfcc_ioctl(struct nfc_dev *nfc_dev, unsigned long arg)
++{
++	int ret = 0;
++	struct platform_gpio *nfc_gpio = &nfc_dev->configs.gpio;
++
++	if (arg == NCI_MODE) {
++		set_valid_gpio(nfc_gpio->mode_sw_nfcc, 0);
++	} else if (arg == EMVCO_MODE) {
++		set_valid_gpio(nfc_gpio->mode_sw_nfcc, 1);
++	} else {
++		pr_err("%s: bad arg %lu\n", __func__, arg);
++		ret = -ENOIOCTLCMD;
++	}
++	return ret;
++}
++
++/**
++ * nfc_ioctl_power_states() - power control
++ * @nfc_dev:    nfc device data structure
++ * @arg:    mode that we want to move to
++ *
++ * Device power control. Depending on the arg value, device moves to
++ * different states, refer common.h for args
++ *
++ * Return: -ENOIOCTLCMD if arg is not supported, 0 in any other case
++ */
++static int nfc_ioctl_power_states(struct nfc_dev *nfc_dev, unsigned long arg)
++{
++	int ret = 0;
++	// struct platform_gpio *nfc_gpio = &nfc_dev->configs.gpio;
++
++	if (arg == NFC_POWER_OFF) {
++		/*
++		 * We are attempting a hardware reset so let us disable
++		 * interrupts to avoid spurious notifications to upper
++		 * layers.
++		 */
++		nfc_dev->nfc_disable_intr(nfc_dev);
++		gpio_set_ven(nfc_dev, 0);
++		nfc_dev->nfc_ven_enabled = false;
++	} else if (arg == NFC_POWER_ON) {
++		nfc_dev->nfc_enable_intr(nfc_dev);
++		gpio_set_ven(nfc_dev, 1);
++		nfc_dev->nfc_ven_enabled = true;
++	}  else if (arg == NFC_FW_DWL_VEN_TOGGLE) {
++		/*
++		 * We are switching to download Mode, toggle the enable pin
++		 * in order to set the NFCC in the new mode
++		 */
++		nfc_dev->nfc_disable_intr(nfc_dev);
++		nfc_dev->nfc_state = NFC_STATE_FW_DWL;
++		gpio_set_ven(nfc_dev, 0);
++		gpio_set_ven(nfc_dev, 1);
++		nfc_dev->nfc_enable_intr(nfc_dev);
++	} else if (arg == NFC_FW_DWL_HIGH) {
++		/*
++		 * Setting firmware download gpio to HIGH
++		 * before FW download start
++		 */
++		nfc_dev->nfc_state = NFC_STATE_FW_DWL;
++
++	} else if (arg == NFC_FW_DWL_LOW) {
++		/*
++		 * Setting firmware download gpio to LOW
++		 * FW download finished
++		 */
++		nfc_dev->nfc_state = NFC_STATE_NCI;
++	} else if (arg == NFC_VEN_FORCED_HARD_RESET) {
++		nfc_dev->nfc_disable_intr(nfc_dev);
++		gpio_set_ven(nfc_dev, 0);
++		gpio_set_ven(nfc_dev, 1);
++		nfc_dev->nfc_enable_intr(nfc_dev);
++	} else {
++		pr_err("%s: bad arg %lu\n", __func__, arg);
++		ret = -ENOIOCTLCMD;
++	}
++	return ret;
++}
++
++/**
++ * nfc_dev_ioctl - used to set or get data from upper layer.
++ * @pfile   file node for opened device.
++ * @cmd     ioctl type from upper layer.
++ * @arg     ioctl arg from upper layer.
++ *
++ * NFC and ESE Device power control, based on the argument value
++ *
++ * Return: -ENOIOCTLCMD if arg is not supported, 0 or other in any other case
++ */
++long nfc_dev_ioctl(struct file *pfile, unsigned int cmd, unsigned long arg)
++{
++	int ret = 0;
++	struct nfc_dev *nfc_dev = pfile->private_data;
++
++	if (!nfc_dev)
++		return -ENODEV;
++
++	pr_debug("%s: cmd = %x arg = %zx\n", __func__, cmd, arg);
++	if (cmd == NFC_SET_PWR) {
++		ret = nfc_ioctl_power_states(nfc_dev, arg);
++	} else if (cmd == NFCC_PROFILE_SWITCH) {
++		ret = mode_switch_nfcc_ioctl(nfc_dev, arg);
++	} else if (cmd == LEDS_CONTROL) {
++		ret = led_switch_control_ioctl(nfc_dev, arg);
++	} else {
++		pr_err("%s: bad cmd %lu\n", __func__, arg);
++		ret = -ENOIOCTLCMD;
++	}
++	return ret;
++}
++
++int nfc_dev_open(struct inode *inode, struct file *filp)
++{
++	struct nfc_dev *nfc_dev =
++	    container_of(inode->i_cdev, struct nfc_dev, c_dev);
++
++	pr_debug("%s: %d, %d\n", __func__, imajor(inode), iminor(inode));
++
++	mutex_lock(&nfc_dev->dev_ref_mutex);
++
++	filp->private_data = nfc_dev;
++
++	if (nfc_dev->dev_ref_count == 0)
++		nfc_dev->nfc_enable_intr(nfc_dev);
++	nfc_dev->dev_ref_count = nfc_dev->dev_ref_count + 1;
++	mutex_unlock(&nfc_dev->dev_ref_mutex);
++	return 0;
++}
++
++int nfc_dev_close(struct inode *inode, struct file *filp)
++{
++	struct nfc_dev *nfc_dev =
++	    container_of(inode->i_cdev, struct nfc_dev, c_dev);
++
++	pr_debug("%s: %d, %d\n", __func__, imajor(inode), iminor(inode));
++	mutex_lock(&nfc_dev->dev_ref_mutex);
++	if (nfc_dev->dev_ref_count == 1)
++		nfc_dev->nfc_disable_intr(nfc_dev);
++	if (nfc_dev->dev_ref_count > 0)
++		nfc_dev->dev_ref_count = nfc_dev->dev_ref_count - 1;
++	filp->private_data = NULL;
++
++	mutex_unlock(&nfc_dev->dev_ref_mutex);
++	return 0;
++}
++
++int nfc_dev_flush(struct file *pfile, fl_owner_t id)
++{
++	struct nfc_dev *nfc_dev = pfile->private_data;
++
++	if (!nfc_dev)
++		return -ENODEV;
++	/*
++	 * release blocked user thread waiting for pending read during close
++	 */
++	if (!mutex_trylock(&nfc_dev->read_mutex)) {
++		nfc_dev->release_read = true;
++		nfc_dev->nfc_disable_intr(nfc_dev);
++		wake_up(&nfc_dev->read_wq);
++		pr_debug("%s: waiting for release of blocked read\n", __func__);
++		mutex_lock(&nfc_dev->read_mutex);
++		nfc_dev->release_read = false;
++	} else {
++		pr_debug("%s: read thread already released\n", __func__);
++	}
++	mutex_unlock(&nfc_dev->read_mutex);
++	return 0;
++}
++
++int validate_nfc_state_nci(struct nfc_dev *nfc_dev)
++{
++	struct platform_gpio *nfc_gpio = &nfc_dev->configs.gpio;
++
++	if (!gpio_get_value(nfc_gpio->ven)) {
++		pr_err("%s: ven low - nfcc powered off\n", __func__);
++		return -ENODEV;
++	}
++	if (nfc_dev->nfc_state != NFC_STATE_NCI) {
++		pr_err("%s: fw download state\n", __func__);
++		return -EBUSY;
++	}
++	return 0;
++}
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/common.h b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/common.h
+new file mode 100644
+index 00000000000..64e7f7e11af
+--- /dev/null
++++ b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/common.h
+@@ -0,0 +1,203 @@
++/******************************************************************************
++ * Copyright (C) 2015, The Linux Foundation. All rights reserved.
++ * Copyright 2019-2023 NXP
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ *
++ ******************************************************************************/
++#ifndef _COMMON_H_
++#define _COMMON_H_
++
++#include <linux/cdev.h>
++#include "i2c_drv.h"
++
++/* Max device count for this driver */
++#define DEV_COUNT			1
++/* i2c device class */
++#define CLASS_NAME			"nxp-nfc"
++
++/* NFC character device name, this will be in /dev/ */
++#define NFC_CHAR_DEV_NAME		"nxpnfc"
++
++/* NCI packet details */
++#define NCI_CMD				(0x20)
++#define NCI_RSP				(0x40)
++#define NCI_HDR_LEN			(3)
++#define NCI_HDR_IDX			(0)
++#define NCI_HDR_OID_IDX			(1)
++#define NCI_PAYLOAD_IDX			(3)
++#define NCI_PAYLOAD_LEN_IDX		(2)
++
++/* FW DNLD packet details */
++#define DL_HDR_LEN			(2)
++#define DL_CRC_LEN			(2)
++
++#define MAX_NCI_PAYLOAD_LEN		(255)
++#define MAX_NCI_BUFFER_SIZE		(NCI_HDR_LEN + MAX_NCI_PAYLOAD_LEN)
++#define MAX_DL_PAYLOAD_LEN		(550)
++#define MAX_DL_BUFFER_SIZE		(DL_HDR_LEN + DL_CRC_LEN + \
++					MAX_DL_PAYLOAD_LEN)
++
++/* Retry count for normal write */
++#define NO_RETRY			(1)
++/* Maximum retry count for standby writes */
++#define MAX_RETRY_COUNT			(3)
++#define MAX_WRITE_IRQ_COUNT		(5)
++#define MAX_IRQ_WAIT_TIME		(90)
++#define WAKEUP_SRC_TIMEOUT		(2000)
++
++/* command response timeout */
++#define NCI_CMD_RSP_TIMEOUT_MS		(2000)
++/* Time to wait for NFCC to be ready again after any change in the GPIO */
++#define NFC_GPIO_SET_WAIT_TIME_US	(10000)
++/* Time to wait for IRQ low during write 5*3ms */
++#define NFC_WRITE_IRQ_WAIT_TIME_US	(3000)
++/* Time to wait before retrying i2c/I3C writes */
++#define WRITE_RETRY_WAIT_TIME_US	(1000)
++/* Time to wait before retrying read for some specific usecases */
++#define READ_RETRY_WAIT_TIME_US		(3500)
++#define NFC_MAGIC			(0xE9)
++
++/* Ioctls */
++/* The type should be aligned with MW HAL definitions */
++#define NFC_SET_PWR			_IOW(NFC_MAGIC, 0x01, uint32_t)
++#define NFCC_PROFILE_SWITCH         _IOW(NFC_MAGIC, 0x04, uint32_t)
++#define LEDS_CONTROL             _IOW(NFC_MAGIC, 0x06, uint32_t)
++
++#define DTS_IRQ_GPIO_STR		"nxp,nxpnfc-irq"
++#define DTS_VEN_GPIO_STR		"nxp,nxpnfc-ven"
++#define DTS_MODE_SW_STR         "nxp,nxpnfc-mode_sw"
++#define DTS_RED_LED_STR         "nxp,nxpnfc-led1"
++#define DTS_GREEN_LED_STR       "nxp,nxpnfc-led2"
++
++enum nfcc_ioctl_request {
++	/* NFC disable request with VEN LOW */
++	NFC_POWER_OFF = 0,
++	/* NFC enable request with VEN Toggle */
++	NFC_POWER_ON,
++	/* firmware download request with VEN Toggle */
++	NFC_FW_DWL_VEN_TOGGLE,
++	/* ISO reset request */
++	NFC_ISO_RESET,
++	/* request for firmware download gpio HIGH */
++	NFC_FW_DWL_HIGH,
++	/* VEN hard reset request */
++	NFC_VEN_FORCED_HARD_RESET,
++	/* request for firmware download gpio LOW */
++	NFC_FW_DWL_LOW,
++};
++
++/* nfc platform interface type */
++enum interface_flags {
++	/* I2C physical IF for NFCC */
++	PLATFORM_IF_I2C = 0,
++	PLATFORM_IF_SPI = 1,
++};
++
++/* NFCC profile type */
++enum nfcc_profile_flags {
++	NCI_MODE = 0,
++	EMVCO_MODE,
++};
++/* nfc state flags */
++enum nfc_state_flags {
++	/* nfc in unknown state */
++	NFC_STATE_UNKNOWN = 0,
++	/* nfc in download mode */
++	NFC_STATE_FW_DWL = 0x1,
++	/* nfc booted in NCI mode */
++	NFC_STATE_NCI = 0x2,
++	/* nfc booted in Fw teared mode */
++	NFC_STATE_FW_TEARED = 0x4,
++};
++
++/* Enum for GPIO values */
++enum gpio_values {
++	GPIO_INPUT = 0x0,
++	GPIO_OUTPUT = 0x1,
++	GPIO_HIGH = 0x2,
++	GPIO_OUTPUT_HIGH = 0x3,
++	GPIO_IRQ = 0x4,
++};
++
++/* NFC GPIO variables */
++struct platform_gpio {
++	unsigned int irq;
++	unsigned int ven;
++	unsigned int mode_sw_nfcc;
++	unsigned int led_red;
++	unsigned int led_green;
++};
++
++/* NFC Struct to get all the required configs from DTS */
++struct platform_configs {
++	struct platform_gpio gpio;
++};
++
++/* Enum for status of LED*/
++enum led_flags {
++	RED_LED_OFF,
++	RED_LED_ON,
++	GREEN_LED_OFF,
++	GREEN_LED_ON,
++};
++
++/* Device specific structure */
++struct nfc_dev {
++	wait_queue_head_t read_wq;
++	struct mutex read_mutex;
++	struct mutex write_mutex;
++	uint8_t *read_kbuf;
++	uint8_t *write_kbuf;
++	struct mutex dev_ref_mutex;
++	unsigned int dev_ref_count;
++	struct class *nfc_class;
++	struct device *nfc_device;
++	struct cdev c_dev;
++	dev_t devno;
++	/* Interface flag */
++	uint8_t interface;
++	/* nfc state flags */
++	uint8_t nfc_state;
++	/* NFC VEN pin state */
++	bool nfc_ven_enabled;
++	bool release_read;
++	struct i2c_dev i2c_dev;
++	struct platform_configs configs;
++	/* function pointers for the common i2c functionality */
++	int (*nfc_read)(struct nfc_dev *dev, char *buf, size_t count);
++	int (*nfc_write)(struct nfc_dev *dev, const char *buf,
++			 const size_t count, int max_retry_cnt);
++	int (*nfc_enable_intr)(struct nfc_dev *dev);
++	int (*nfc_disable_intr)(struct nfc_dev *dev);
++};
++
++int nfc_dev_open(struct inode *inode, struct file *filp);
++int nfc_dev_close(struct inode *inode, struct file *filp);
++int nfc_dev_flush(struct file *pfile, fl_owner_t id);
++long nfc_dev_ioctl(struct file *pfile, unsigned int cmd, unsigned long arg);
++int nfc_parse_dt(struct device *dev, struct platform_configs *nfc_configs,
++		 uint8_t interface);
++int nfc_misc_register(struct nfc_dev *nfc_dev,
++		      const struct file_operations *nfc_fops, int count,
++		      char *devname, char *classname);
++void nfc_misc_unregister(struct nfc_dev *nfc_dev, int count);
++int configure_gpio(unsigned int gpio, int flag);
++int configure_leds(struct platform_gpio *nfc_gpio);
++void gpio_set_ven(struct nfc_dev *nfc_dev, int value);
++void gpio_free_all(struct nfc_dev *nfc_dev);
++int validate_nfc_state_nci(struct nfc_dev *nfc_dev);
++int get_valid_gpio(int gpio);
++#endif /* _COMMON_H_ */
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/i2c_drv.c b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/i2c_drv.c
+new file mode 100644
+index 00000000000..438f58f99d1
+--- /dev/null
++++ b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/i2c_drv.c
+@@ -0,0 +1,500 @@
++/******************************************************************************
++ * Copyright (C) 2015, The Linux Foundation. All rights reserved.
++ * Copyright 2013-2023 NXP
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ *
++ ******************************************************************************/
++/*
++ * Copyright (C) 2010 Trusted Logic S.A.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#include <linux/module.h>
++#include <linux/interrupt.h>
++#include <linux/delay.h>
++#include <linux/uaccess.h>
++#include <linux/gpio.h>
++
++#include "common.h"
++
++/**
++ * i2c_disable_irq()
++ *
++ * Check if interrupt is disabled or not
++ * and disable interrupt
++ *
++ * Return: int
++ */
++int i2c_disable_irq(struct nfc_dev *dev)
++{
++	unsigned long flags;
++
++	spin_lock_irqsave(&dev->i2c_dev.irq_enabled_lock, flags);
++	if (dev->i2c_dev.irq_enabled) {
++		disable_irq_nosync(dev->i2c_dev.client->irq);
++		dev->i2c_dev.irq_enabled = false;
++	}
++	spin_unlock_irqrestore(&dev->i2c_dev.irq_enabled_lock, flags);
++
++	return 0;
++}
++
++/**
++ * i2c_enable_irq()
++ *
++ * Check if interrupt is enabled or not
++ * and enable interrupt
++ *
++ * Return: int
++ */
++int i2c_enable_irq(struct nfc_dev *dev)
++{
++	unsigned long flags;
++
++	spin_lock_irqsave(&dev->i2c_dev.irq_enabled_lock, flags);
++	if (!dev->i2c_dev.irq_enabled) {
++		dev->i2c_dev.irq_enabled = true;
++		enable_irq(dev->i2c_dev.client->irq);
++	}
++	spin_unlock_irqrestore(&dev->i2c_dev.irq_enabled_lock, flags);
++
++	return 0;
++}
++
++static irqreturn_t i2c_irq_handler(int irq, void *dev_id)
++{
++	struct nfc_dev *nfc_dev = dev_id;
++	struct i2c_dev *i2c_dev = &nfc_dev->i2c_dev;
++
++	if (device_may_wakeup(&i2c_dev->client->dev))
++		pm_wakeup_event(&i2c_dev->client->dev, WAKEUP_SRC_TIMEOUT);
++
++	i2c_disable_irq(nfc_dev);
++	wake_up(&nfc_dev->read_wq);
++
++	return IRQ_HANDLED;
++}
++
++int i2c_read(struct nfc_dev *nfc_dev, char *buf, size_t count)
++{
++	int ret;
++	struct i2c_dev *i2c_dev = &nfc_dev->i2c_dev;
++	struct platform_gpio *nfc_gpio = &nfc_dev->configs.gpio;
++
++	pr_debug("%s: reading %zu bytes.\n", __func__, count);
++
++	if (count > MAX_NCI_BUFFER_SIZE)
++		count = MAX_NCI_BUFFER_SIZE;
++
++	if (!gpio_get_value(nfc_gpio->irq)) {
++		while (1) {
++			ret = 0;
++			if (!i2c_dev->irq_enabled) {
++				i2c_dev->irq_enabled = true;
++				enable_irq(i2c_dev->client->irq);
++			}
++			if (!gpio_get_value(nfc_gpio->irq)) {
++				ret = wait_event_interruptible(nfc_dev->read_wq,
++								   !i2c_dev->
++								   irq_enabled);
++				if (ret) {
++					pr_err("%s: err wakeup of wq\n",
++						   __func__);
++					goto err;
++				}
++			}
++			i2c_disable_irq(nfc_dev);
++
++			if (gpio_get_value(nfc_gpio->irq))
++				break;
++			if (!gpio_get_value(nfc_gpio->ven)) {
++				pr_info("%s: releasing read\n", __func__);
++				ret = -EIO;
++				goto err;
++			}
++			/*
++			 * NFC service wanted to close the driver so,
++			 * release the calling reader thread asap.
++			 *
++			 * This can happen in case of nfc node close call from
++			 * eSE HAL in that case the NFC HAL reader thread
++			 * will again call read system call
++			 */
++			if (nfc_dev->release_read) {
++				pr_debug("%s: releasing read\n", __func__);
++				return 0;
++			}
++			pr_warn("%s: spurious interrupt detected\n", __func__);
++		}
++	}
++
++	memset(buf, 0x00, count);
++	/* Read data */
++	ret = i2c_master_recv(nfc_dev->i2c_dev.client, buf, count);
++	if (ret <= 0) {
++		pr_err("%s: returned %d\n", __func__, ret);
++		goto err;
++	}
++err:
++	return ret;
++}
++
++int i2c_write(struct nfc_dev *nfc_dev, const char *buf, size_t count,
++		  int max_retry_cnt)
++{
++	int ret = -EINVAL;
++	int retry_cnt;
++	struct platform_gpio *nfc_gpio = &nfc_dev->configs.gpio;
++
++	if (count > MAX_DL_BUFFER_SIZE)
++		count = MAX_DL_BUFFER_SIZE;
++
++	pr_debug("%s: writing %zu bytes.\n", __func__, count);
++	/*
++	 * Wait for any pending read for max 15ms before write
++	 * This is to avoid any packet corruption during read, when
++	 * the host cmds resets NFCC during any parallel read operation
++	 */
++	for (retry_cnt = 1; retry_cnt <= MAX_WRITE_IRQ_COUNT; retry_cnt++) {
++		if (gpio_get_value(nfc_gpio->irq)) {
++			pr_warn("%s: irq high during write, wait\n", __func__);
++			usleep_range(NFC_WRITE_IRQ_WAIT_TIME_US,
++					 NFC_WRITE_IRQ_WAIT_TIME_US + 100);
++		} else {
++			break;
++		}
++		if (retry_cnt == MAX_WRITE_IRQ_COUNT &&
++			gpio_get_value(nfc_gpio->irq)) {
++			pr_warn("%s: allow after maximum wait\n", __func__);
++		}
++	}
++
++	for (retry_cnt = 1; retry_cnt <= max_retry_cnt; retry_cnt++) {
++		ret = i2c_master_send(nfc_dev->i2c_dev.client, buf, count);
++		if (ret <= 0) {
++			pr_warn("%s: write failed ret(%d), maybe in standby\n",
++				__func__, ret);
++			usleep_range(WRITE_RETRY_WAIT_TIME_US,
++					 WRITE_RETRY_WAIT_TIME_US + 100);
++		} else if (ret != count) {
++			pr_err("%s: failed to write %d\n", __func__, ret);
++			ret = -EIO;
++		} else if (ret == count)
++			break;
++	}
++	return ret;
++}
++
++ssize_t nfc_i2c_dev_read(struct file *filp, char __user *buf, size_t count,
++			 loff_t *offset)
++{
++	int ret;
++	struct nfc_dev *nfc_dev = (struct nfc_dev *)filp->private_data;
++
++	if (!nfc_dev) {
++		pr_err("%s: device doesn't exist anymore\n", __func__);
++		return -ENODEV;
++	}
++	mutex_lock(&nfc_dev->read_mutex);
++	if (filp->f_flags & O_NONBLOCK) {
++		ret = i2c_master_recv(nfc_dev->i2c_dev.client, nfc_dev->read_kbuf, count);
++		pr_debug("%s: NONBLOCK read ret = %d\n", __func__, ret);
++	} else {
++		ret = i2c_read(nfc_dev, nfc_dev->read_kbuf, count);
++	}
++	if (ret > 0) {
++		if (copy_to_user(buf, nfc_dev->read_kbuf, ret)) {
++			pr_warn("%s: failed to copy to user space\n", __func__);
++			ret = -EFAULT;
++		}
++	}
++	mutex_unlock(&nfc_dev->read_mutex);
++	return ret;
++}
++
++ssize_t nfc_i2c_dev_write(struct file *filp, const char __user *buf,
++			  size_t count, loff_t *offset)
++{
++	int ret;
++	struct nfc_dev *nfc_dev = (struct nfc_dev *)filp->private_data;
++
++	if (count > MAX_DL_BUFFER_SIZE)
++		count = MAX_DL_BUFFER_SIZE;
++
++	mutex_lock(&nfc_dev->write_mutex);
++	if (copy_from_user(nfc_dev->write_kbuf, buf, count)) {
++		pr_err("%s: failed to copy from user space\n", __func__);
++		mutex_unlock(&nfc_dev->write_mutex);
++		return -EFAULT;
++	}
++	ret = i2c_write(nfc_dev, nfc_dev->write_kbuf, count, NO_RETRY);
++	mutex_unlock(&nfc_dev->write_mutex);
++	return ret;
++}
++
++static const struct file_operations nfc_i2c_dev_fops = {
++	.owner = THIS_MODULE,
++	.llseek = no_llseek,
++	.read = nfc_i2c_dev_read,
++	.write = nfc_i2c_dev_write,
++	.open = nfc_dev_open,
++	.release = nfc_dev_close,
++	.flush   = nfc_dev_flush,
++	.unlocked_ioctl = nfc_dev_ioctl,
++};
++
++int nfc_i2c_dev_probe(struct i2c_client *client, const struct i2c_device_id *id)
++{
++	int ret = 0;
++	struct nfc_dev *nfc_dev = NULL;
++	struct i2c_dev *i2c_dev = NULL;
++	struct platform_configs nfc_configs;
++	struct platform_gpio *nfc_gpio = &nfc_configs.gpio;
++
++	pr_debug("%s: enter\n", __func__);
++	pr_info("%s: i2c slave address 0x%x", __func__, client->addr);
++	/* retrieve details of gpios from dt */
++	ret = nfc_parse_dt(&client->dev, &nfc_configs, PLATFORM_IF_I2C);
++	if (ret) {
++		pr_err("%s: failed to parse dt\n", __func__);
++		goto err;
++	}
++
++	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
++		pr_err("%s: need I2C_FUNC_I2C\n", __func__);
++		ret = -ENODEV;
++		goto err;
++	}
++	nfc_dev = kzalloc(sizeof(struct nfc_dev), GFP_KERNEL);
++	if (nfc_dev == NULL) {
++		ret = -ENOMEM;
++		goto err;
++	}
++	nfc_dev->read_kbuf = kzalloc(MAX_NCI_BUFFER_SIZE, GFP_DMA | GFP_KERNEL);
++	if (!nfc_dev->read_kbuf) {
++		ret = -ENOMEM;
++		goto err_free_nfc_dev;
++	}
++	nfc_dev->write_kbuf = kzalloc(MAX_DL_BUFFER_SIZE, GFP_DMA | GFP_KERNEL);
++	if (!nfc_dev->write_kbuf) {
++		ret = -ENOMEM;
++		goto err_free_read_kbuf;
++	}
++	nfc_dev->interface = PLATFORM_IF_I2C;
++	nfc_dev->nfc_state = NFC_STATE_NCI;
++	nfc_dev->i2c_dev.client = client;
++	i2c_dev = &nfc_dev->i2c_dev;
++	nfc_dev->nfc_read = i2c_read;
++	nfc_dev->nfc_write = i2c_write;
++	nfc_dev->nfc_enable_intr = i2c_enable_irq;
++	nfc_dev->nfc_disable_intr = i2c_disable_irq;
++	ret = configure_gpio(nfc_gpio->ven, GPIO_OUTPUT);
++	if (ret) {
++		pr_err("%s: unable to request nfc reset gpio [%d]\n", __func__,
++			   nfc_gpio->ven);
++		goto err_free_write_kbuf;
++	}
++	ret = configure_gpio(nfc_gpio->irq, GPIO_IRQ);
++	if (ret <= 0) {
++		pr_err("%s: unable to request nfc irq gpio [%d]\n", __func__,
++			   nfc_gpio->irq);
++		goto err_free_gpio;
++	}
++	client->irq = ret;
++	ret = configure_gpio(nfc_gpio->mode_sw_nfcc, GPIO_OUTPUT);
++	if (ret) {
++		pr_err
++			("%s: unable to request mode switch interface gpio [%d]\n",
++			 __func__, nfc_gpio->mode_sw_nfcc);
++		goto err_free_gpio;
++	}
++	#ifdef CONFIG_NXP_DEBUG_BOARD
++	/* configure board leds as OUTPUT gpios */
++	configure_leds(nfc_gpio);
++	#endif
++
++	/* copy the retrieved gpio details from DT */
++	memcpy(&nfc_dev->configs, &nfc_configs,
++		   sizeof(struct platform_configs));
++
++	/* init mutex and queues */
++	init_waitqueue_head(&nfc_dev->read_wq);
++	mutex_init(&nfc_dev->read_mutex);
++	mutex_init(&nfc_dev->write_mutex);
++	mutex_init(&nfc_dev->dev_ref_mutex);
++	spin_lock_init(&i2c_dev->irq_enabled_lock);
++	ret = nfc_misc_register(nfc_dev, &nfc_i2c_dev_fops, DEV_COUNT,
++				NFC_CHAR_DEV_NAME, CLASS_NAME);
++	if (ret) {
++		pr_err("%s: nfc_misc_register failed\n", __func__);
++		goto err_mutex_destroy;
++	}
++	/* interrupt initializations */
++	pr_info("%s: requesting IRQ %d\n", __func__, client->irq);
++	i2c_dev->irq_enabled = true;
++	ret = request_irq(client->irq, i2c_irq_handler, IRQF_TRIGGER_HIGH,
++			  client->name, nfc_dev);
++	if (ret) {
++		pr_err("%s: request_irq failed\n", __func__);
++		goto err_nfc_misc_unregister;
++	}
++	i2c_disable_irq(nfc_dev);
++	gpio_set_ven(nfc_dev, 1);
++	gpio_set_ven(nfc_dev, 0);
++	gpio_set_ven(nfc_dev, 1);
++
++	device_init_wakeup(&client->dev, true);
++	i2c_set_clientdata(client, nfc_dev);
++	i2c_dev->irq_wake_up = false;
++	pr_info("%s: probing nfc i2c successfully\n", __func__);
++	return 0;
++err_nfc_misc_unregister:
++	nfc_misc_unregister(nfc_dev, DEV_COUNT);
++err_mutex_destroy:
++	mutex_destroy(&nfc_dev->dev_ref_mutex);
++	mutex_destroy(&nfc_dev->read_mutex);
++	mutex_destroy(&nfc_dev->write_mutex);
++err_free_gpio:
++	gpio_free_all(nfc_dev);
++err_free_write_kbuf:
++	kfree(nfc_dev->write_kbuf);
++err_free_read_kbuf:
++	kfree(nfc_dev->read_kbuf);
++err_free_nfc_dev:
++	kfree(nfc_dev);
++err:
++	pr_err("%s: probing not successful, check hardware\n", __func__);
++	return ret;
++}
++
++int nfc_i2c_dev_remove(struct i2c_client *client)
++{
++	int ret = 0;
++	struct nfc_dev *nfc_dev = NULL;
++
++	pr_info("%s: remove device\n", __func__);
++	nfc_dev = i2c_get_clientdata(client);
++	if (!nfc_dev) {
++		pr_err("%s: device doesn't exist anymore\n", __func__);
++		ret = -ENODEV;
++		return ret;
++	}
++	if (nfc_dev->dev_ref_count > 0) {
++		pr_err("%s: device already in use\n", __func__);
++		return -EBUSY;
++	}
++	device_init_wakeup(&client->dev, false);
++	free_irq(client->irq, nfc_dev);
++	nfc_misc_unregister(nfc_dev, DEV_COUNT);
++	mutex_destroy(&nfc_dev->read_mutex);
++	mutex_destroy(&nfc_dev->write_mutex);
++	gpio_free_all(nfc_dev);
++	kfree(nfc_dev->read_kbuf);
++	kfree(nfc_dev->write_kbuf);
++	kfree(nfc_dev);
++	return ret;
++}
++
++int nfc_i2c_dev_suspend(struct device *device)
++{
++	struct i2c_client *client = to_i2c_client(device);
++	struct nfc_dev *nfc_dev = i2c_get_clientdata(client);
++	struct i2c_dev *i2c_dev = &nfc_dev->i2c_dev;
++
++	if (device_may_wakeup(&client->dev) && i2c_dev->irq_enabled) {
++		if (!enable_irq_wake(client->irq))
++			i2c_dev->irq_wake_up = true;
++	}
++	return 0;
++}
++
++int nfc_i2c_dev_resume(struct device *device)
++{
++	struct i2c_client *client = to_i2c_client(device);
++	struct nfc_dev *nfc_dev = i2c_get_clientdata(client);
++	struct i2c_dev *i2c_dev = &nfc_dev->i2c_dev;
++
++	if (device_may_wakeup(&client->dev) && i2c_dev->irq_wake_up) {
++		if (!disable_irq_wake(client->irq))
++			i2c_dev->irq_wake_up = false;
++	}
++	return 0;
++}
++
++static const struct i2c_device_id nfc_i2c_dev_id[] = { { NFC_I2C_DEV_ID, 0 },
++{ }
++};
++
++static const struct of_device_id nfc_i2c_dev_match_table[] = {
++	{
++	 .compatible = NFC_I2C_DRV_STR,
++	  },
++	{ }
++};
++
++static const struct dev_pm_ops nfc_i2c_dev_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(nfc_i2c_dev_suspend, nfc_i2c_dev_resume)
++};
++
++static struct i2c_driver nfc_i2c_dev_driver = {
++	.id_table = nfc_i2c_dev_id,
++	.probe = nfc_i2c_dev_probe,
++	.remove = nfc_i2c_dev_remove,
++	.driver = {
++		   .name = NFC_I2C_DRV_STR,
++		   .pm = &nfc_i2c_dev_pm_ops,
++		   .of_match_table = nfc_i2c_dev_match_table,
++		   .probe_type = PROBE_PREFER_ASYNCHRONOUS,
++			},
++};
++
++MODULE_DEVICE_TABLE(of, nfc_i2c_dev_match_table);
++static int __init nfc_i2c_dev_init(void)
++{
++	int ret = 0;
++
++	pr_info("%s: Loading NXP NFC I2C driver\n", __func__);
++	ret = i2c_add_driver(&nfc_i2c_dev_driver);
++	if (ret != 0)
++		pr_err("%s: NFC I2C add driver error ret %d\n", __func__, ret);
++	return ret;
++}
++
++module_init(nfc_i2c_dev_init);
++
++static void __exit nfc_i2c_dev_exit(void)
++{
++	pr_info("%s: Unloading NXP NFC I2C driver\n", __func__);
++	i2c_del_driver(&nfc_i2c_dev_driver);
++}
++
++module_exit(nfc_i2c_dev_exit);
++
++MODULE_DESCRIPTION("NXP NFC I2C driver");
++MODULE_LICENSE("GPL");
+diff --git a/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/i2c_drv.h b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/i2c_drv.h
+new file mode 100644
+index 00000000000..86cb602eb0f
+--- /dev/null
++++ b/UM.9.15/kernel/msm-4.19/drivers/nfc/pn7220/i2c_drv.h
+@@ -0,0 +1,48 @@
++/******************************************************************************
++ * Copyright (C) 2015, The Linux Foundation. All rights reserved.
++ * Copyright 2019-2023 NXP
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ *
++ ******************************************************************************/
++#ifndef _I2C_DRV_H_
++#define _I2C_DRV_H_
++
++#include <linux/i2c.h>
++
++/* kept same as dts */
++#define NFC_I2C_DRV_STR			"nxp,nxpnfc"
++#define NFC_I2C_M_DRV_STR		"nxp,nxpnfc_m"
++#define NFC_I2C_DEV_ID			"nxpnfc"
++#define NFC_I2C_M_DEV_ID		"nxpnfc_m"
++#define CONFIG_NXP_DEBUG_BOARD   y
++/* Interface specific parameters */
++struct i2c_dev {
++	struct i2c_client *client;
++	/* IRQ parameters */
++	bool irq_enabled;
++	spinlock_t irq_enabled_lock;
++	/* NFC_IRQ wake-up state */
++	bool irq_wake_up;
++};
++
++long nfc_i2c_dev_ioctl(struct file *pfile, unsigned int cmd, unsigned long arg);
++int nfc_i2c_dev_probe(struct i2c_client *client,
++		      const struct i2c_device_id *id);
++int nfc_i2c_dev_remove(struct i2c_client *client);
++int nfc_i2c_dev_suspend(struct device *device);
++int nfc_i2c_dev_resume(struct device *device);
++
++#endif /* _I2C_DRV_H_ */
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
+index c460a5f5c83..81dfef4d0fb 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba-iot-idp.dtsi
+@@ -341,3 +341,18 @@
+ 				&nfc_clk_req_suspend>;
+ 	};
+ };
++
++&qupv3_se0_i2c {
++	status = "ok";
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	nxpnfc: nxpnfc@28 { 
++		compatible = "nxp,nxpnfc";
++		reg = <0x28>;
++		nxp,nxpnfc-irq = <&tlmm 34 GPIO_ACTIVE_HIGH>;
++		nxp,nxpnfc-ven = <&pm2250_gpios 3 GPIO_ACTIVE_HIGH>;
++		//nxp,nxpnfc-fw-dwnld = <&tlmm 105 GPIO_ACTIVE_HIGH>;
++		nxp,nxpnfc-mode_sw = <&tlmm 105 GPIO_ACTIVE_HIGH>;
++	};
++};
+\ No newline at end of file
+diff --git a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba.dtsi b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba.dtsi
+index 971182b315c..46b0a5ce883 100755
+--- a/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba.dtsi
++++ b/UM.9.15/vendor/qcom/proprietary/devicetree-4.19/qcom/scuba.dtsi
+@@ -43,7 +43,7 @@
+ 		swr0 = &swr0;
+ 		swr1 = &swr1;
+ 		hsuart0 = &qupv3_se3_4uart;
+-		hsuart1 = &qupv3_se0_4uart;
++		i2c0 = &qupv3_se0_i2c;
+ 	};
+ 
+ 	cpus {
+@@ -2704,6 +2704,10 @@
+ };
+ 
+ &qupv3_se0_4uart {
++	status = "disabled";
++};
++
++&qupv3_se0_i2c {
+ 	status = "ok";
+ };
+ 
+-- 
+2.43.0
+

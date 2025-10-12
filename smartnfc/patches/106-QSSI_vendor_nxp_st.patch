@@ -1,0 +1,22 @@
+diff --git a/QSSI.14/vendor/nxp/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk b/QSSI.14/vendor/nxp/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk
+index 0a59ef3..73e407c 100644
+--- a/QSSI.14/vendor/nxp/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk
++++ b/QSSI.14/vendor/nxp/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk
+@@ -1,5 +1,5 @@
+ ifeq ($(TARGET_FWK_SUPPORTS_FULL_VALUEADDS), true)
+-TARGET_USES_QSSI_NQ_NFC := true
++TARGET_USES_QSSI_NQ_NFC := false
+ 
+ NQ_SYSTEM_NFC := NQNfcNci
+ NQ_SYSTEM_NFC += libnqnfc-nci
+diff --git a/QSSI.14/vendor/st/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk b/QSSI.14/vendor/st/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk
+index 257a1da..618d08f 100644
+--- a/QSSI.14/vendor/st/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk
++++ b/QSSI.14/vendor/st/opensource/commonsys/packages/apps/Nfc/nfc_system_product.mk
+@@ -1,5 +1,5 @@
+ ifeq ($(TARGET_FWK_SUPPORTS_FULL_VALUEADDS), true)
+-TARGET_USES_QSSI_STM_NFC := true
++TARGET_USES_QSSI_STM_NFC := false
+ 
+ STM_SYSTEM_NFC := Nfc_st
+ STM_SYSTEM_NFC += libstnfc-nci
